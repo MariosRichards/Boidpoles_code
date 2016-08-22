@@ -19,7 +19,8 @@ function createNewPole()
 	    vy: getVelocityValueY(),
 	    path: d3.range(TAIL_LENGTH).map(function() { return [x, y]; }),
 	    count: 0,
-	    key: UNIQUE_KEY
+	    key: UNIQUE_KEY,
+    	collision_cooldown: COLLISION_COOLDOWN
 		
 	};
 	
