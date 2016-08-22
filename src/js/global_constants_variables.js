@@ -1,8 +1,15 @@
 
+
+
 //Constants
 
 var CANVAS_WIDTH = 960, //Default 960
     CANVAS_HEIGHT = 500; //Default 500
+    
+var canvas_container = d3.select("body").append("div").attr("id", "canvas_container");
+
+CANVAS_WIDTH = parseInt(d3.select("#canvas_container").style("width"));
+CANVAS_HEIGHT = parseInt(d3.select("#canvas_container").style("height"));
     
 var COLLISION_RADIUS = 8;
 

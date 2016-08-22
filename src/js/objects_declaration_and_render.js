@@ -1,6 +1,13 @@
-var svg = d3.select("body").append("svg")
+
+
+
+console.log(d3.select("#canvas_container"));
+
+var svg = d3.select("#canvas_container").append("svg")
+	.attr("id", "#canvas_container")
     .attr("width", CANVAS_WIDTH)
     .attr("height", CANVAS_HEIGHT);
+    
     
 var head;
 var tail;
