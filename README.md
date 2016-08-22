@@ -1,0 +1,1 @@
+Inspired by the Paper.js [“tadpoles” example](http://paperjs.org/examples/tadpoles/). Built with [D3](http://d3js.org/). Feeling inspired? Fork this example and incorporate the [Boids flocking](http://www.jasondavies.com/voroboids/) algorithm.
