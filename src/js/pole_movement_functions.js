@@ -5,15 +5,20 @@ function bounceWalls(x,y,spermatozoon)
     
 }
 
-function poleSwim(x,y,dx,dy,k1,path,count,speed,spermatozoon)
+function poleSwim(x,y,dx,dy,k1,path,count,spermatozoon)
 {
-	for (var j = 0; ++j < TAIL_LENGTH;) {
+	for (var j = 1; j < path.length; j++) {
       var vx = x - path[j][0],
           vy = y - path[j][1],
-          k2 = Math.sin(((spermatozoon.count += count) + j * 3) / 300) / speed;
-      path[j][0] = (x += dx / speed * k1) - dy * k2;
-      path[j][1] = (y += dy / speed * k1) + dx * k2;
-      speed = Math.sqrt((dx = vx) * dx + (dy = vy) * dy);
+          k2 = Math.sin( ( (spermatozoon.count++) * count + j * 3) / 300 ) ;
+	  x += dx  * k1
+	  y += dy  * k1
+      path[j][0] = x - dy * k2; // rotated
+      path[j][1] = y + dx * k2;
+	  //dx = vx;
+	  //dy = vy;
+      //speed = Math.sqrt(dx * dx + dy * dy);
+	  [dx, dy] = unitVectors(vx,vy);
     }
 }
 
@@ -24,3 +29,4 @@ function headTransform(d) {
 function tailPath(d) {
   return "M" + d.join("L");
 }
+
