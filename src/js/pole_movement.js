@@ -12,6 +12,8 @@ d3.timer(function() {
     // Bounce off the walls.
     bounceWalls(x,y,spermatozoon);
 
+	detectCollision(x,y,spermatozoon);
+
 	var dx,
         dy,
 		speed;
