@@ -1,27 +1,3 @@
-
-
-var svg = d3.select("body").append("svg")
-    .attr("width", CANVAS_WIDTH)
-    .attr("height", CANVAS_HEIGHT);
-
-var g = svg.selectAll("g")
-    .data(spermatozoa)
-  .enter().append("g");
-
-var head = g.append("ellipse")
-    .attr("rx", 6.5)
-    .attr("ry", 4);
-
-g.append("path")
-    .datum(function(d) { return d.path.slice(0, 3); })
-    .attr("class", "mid");
-
-g.append("path")
-    .datum(function(d) { return d.path; })
-    .attr("class", "tail");
-
-var tail = g.selectAll("path");
-
 d3.timer(function() {
   for (var i = -1; ++i < NUMBER_POLES;) {
     var spermatozoon = spermatozoa[i],
@@ -30,7 +6,7 @@ d3.timer(function() {
         dy = spermatozoon.vy,
         x = path[0][0] += dx,
         y = path[0][1] += dy,
-        speed = Math.sqrt(dx * dx + dy * dy),
+        speed = getSpeed(dx,dy),
         count = speed * 10,
         k1 = -5 - speed / 3;
 
