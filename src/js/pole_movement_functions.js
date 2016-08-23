@@ -11,8 +11,8 @@ function poleSwim(x,y,dx,dy,k1,path,count,spermatozoon)
       var vx = x - path[j][0],
           vy = y - path[j][1],
           k2 = Math.sin( ( (spermatozoon.count++) * count + j * 3) / 300 ) ;
-	  x += dx  * k1
-	  y += dy  * k1
+	  x += dx  * k1;
+	  y += dy  * k1;
       path[j][0] = x - dy * k2; // rotated
       path[j][1] = y + dx * k2;
 	  //dx = vx;
@@ -28,5 +28,39 @@ function headTransform(d) {
 
 function tailPath(d) {
   return "M" + d.join("L");
+}
+
+function polesMoveUpdate()
+{
+	for (var i = 0; i < spermatozoa.length; i++) {
+	    var spermatozoon = spermatozoa[i],
+	        path = spermatozoon.path,
+	        x = path[0][0] + spermatozoon.vx,
+	        y = path[0][1] + spermatozoon.vy;
+	
+	
+		path[0][0] = x;
+		path[0][1] = y;		
+			
+	    // Bounce off the walls.
+	    bounceWalls(x,y,spermatozoon);
+	
+		poleDetectCollision(x,y,spermatozoon,i);
+	
+		var dx,
+	        dy,
+			speed;
+	
+		[dx,dy,speed] = unitVectors(spermatozoon.vx,spermatozoon.vy);
+	
+		var	count = speed * 10,
+			k1 = -5 - speed / 3;	
+		
+	    // Swim!
+	    poleSwim(x,y,dx,dy,k1,path,count,spermatozoon);
+	  }
+	  		  
+	  head.attr("transform", headTransform);
+	  tail.attr("d", tailPath);
 }
 

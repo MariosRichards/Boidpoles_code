@@ -1,11 +1,14 @@
 
 var spermatozoa = [];
 
+var bullets = [];
+
 var svg;
     
 var head;
 var tail;
 
+var bullet_head;
 
 
 function initiateSimulation()
@@ -22,6 +25,8 @@ function initiateSimulation()
     	
 	createManyPoles(INITIAL_NUMBER_POLES);
 	
+	createManyBullets(INITIAL_NUMBER_BULLETS);
+	
 	startGameLoop();
 	
 }
@@ -29,30 +34,48 @@ function initiateSimulation()
 function updatePoles()
 {
 	
-	var group = svg.selectAll("g")
+	var group = svg.selectAll(".pole")
     .data(spermatozoa, function(d){ return d.key; });
     	
-	 var groupNew = group.enter().append("g");
+	 var groupNew = group.enter().append("g").attr("class", "pole");
 	 
 	 group.exit().remove();
 	 
-	 head_new = groupNew.append("ellipse")
+	 var head_new = groupNew.append("ellipse").attr("class", "pole_head").attr("fill","#ffF")
 	    .attr("rx", 6.5)
 	    .attr("ry", 4);
 	    
-	 head = group.selectAll("ellipse");  
+	 head = group.selectAll(".pole_head");  
 	
 	groupNew.append("path")
 	    .datum(function(d) { return d.path.slice(0, 3); })
-	    .attr("class", "mid");
+	    .attr("class", "mid_tail").attr("class", "pole_tail");
 	
 	groupNew.append("path")
 	    .datum(function(d) { return d.path; })
-	    .attr("class", "tail");
+	    .attr("class", "end_tail").attr("class", "pole_tail");
 	
-	tail = group.selectAll("path");
+	tail = group.selectAll(".pole_tail");
 	 
-	return group;
+
+}
+
+function updateBullets()
+{
+	
+	var group = svg.selectAll(".bullet")
+    .data(bullets, function(d){ return d.key; });
+    	
+	 var groupNew = group.enter().append("g").attr("class", "bullet");
+	 
+	 group.exit().remove();
+	 
+	 var bullet_head_new = groupNew.append("ellipse").attr("class", "bullet_head").attr("fill","#f00")
+	    .attr("rx", 6.5)
+	    .attr("ry", 4);
+	    
+	 bullet_head = group.selectAll(".bullet_head");  
+		 
 
 }
 

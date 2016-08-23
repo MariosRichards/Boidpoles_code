@@ -17,4 +17,3 @@ function unitVectors(vx,vy) {
   mag = Math.sqrt(vx**2 + vy**2)
   return [vx/mag, vy/mag, mag]
 }
-

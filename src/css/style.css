@@ -13,10 +13,6 @@ body {
     left: 25%;
 }
 
-ellipse {
-  fill: #fff;
-}
-
 path {
   fill: none;
   stroke: #fff;
