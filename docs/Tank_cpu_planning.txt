@@ -60,6 +60,39 @@ ERRORS
 
 
 
+Design "compiled code" for ease of use in program
+We'll be "compiling" robot code into the "compiled code" in any case
+
+
+Don't worry about V/N - make different codes for each?
+N -> V and N
+V -> V
+
+
+Only issue
+-> no support for self-modifying code
+
+@123 @124 @125
+-> Would not allow this!
+
+
+Choices
+(1) one command per V/N combination, specifies how next operands are to be interpreted
+(2) first bit of operand tells you whether it's a value or a variable (values then have to be 15bit)
+
+Dumbest option is (1)
+
+
+
+How to deal with variable and label use?
+Don't worry
+
+
+Tank_cpu
+
+	memory[256]
+	program[???]
+	ip
 
 
 
