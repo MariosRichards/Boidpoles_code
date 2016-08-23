@@ -71,8 +71,8 @@ function updateBullets()
 	 group.exit().remove();
 	 
 	 var bullet_head_new = groupNew.append("ellipse").attr("class", "bullet_head").attr("fill","#f00")
-	    .attr("rx", 6.5)
-	    .attr("ry", 4);
+	    .attr("rx", 6)
+	    .attr("ry", 1);
 	    
 	 bullet_head = group.selectAll(".bullet_head");  
 		 

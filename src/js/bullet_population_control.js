@@ -11,8 +11,17 @@ function deleteBulletByKey(key)
 	updateBullets();
 }
 
-function createNewBullet(x,y)
+function createNewBullet(x,y,pole)
 {	
+	
+	var vx = BULLET_VELOCITY;
+	var vy = BULLET_VELOCITY;
+	
+	if(pole)
+	{
+		vx = pole.vx*2;
+		vy = pole.vy*2;
+	}
 	
 	BULLET_UNIQUE_KEY += 1;
 		
@@ -20,8 +29,8 @@ function createNewBullet(x,y)
 		
 		x: x,
 		y: y,
-		vx: getVelocityValueX(),
-	    vy: getVelocityValueY(),
+		vx: vx,
+	    vy: vy,
 	    count: 0,
 	    key: BULLET_UNIQUE_KEY,
     	collision_cooldown: INITIAL_BULLET_COLLISION_COOLDOWN
