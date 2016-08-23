@@ -44,4 +44,6 @@ function createManyPoles(number) {
 	{
 		createNewPole();
 	}
+	
+	updatePoles();
 }

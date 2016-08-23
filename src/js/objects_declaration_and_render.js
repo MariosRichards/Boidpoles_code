@@ -1,18 +1,30 @@
 
+var spermatozoa = [];
 
-
-console.log(d3.select("#canvas_container"));
-
-var svg = d3.select("#canvas_container").append("svg")
-	.attr("id", "#canvas_container")
-    .attr("width", CANVAS_WIDTH)
-    .attr("height", CANVAS_HEIGHT);
-    
+var svg;
     
 var head;
 var tail;
 
-updatePoles();
+
+
+function initiateSimulation()
+{
+	var canvas_container = d3.select("body").append("div").attr("id", "canvas_container");
+
+	CANVAS_WIDTH = parseInt(d3.select("#canvas_container").style("width"));
+	CANVAS_HEIGHT = parseInt(d3.select("#canvas_container").style("height"));
+		
+	svg = d3.select("#canvas_container").append("svg")
+	.attr("id", "#canvas_container")
+    .attr("width", CANVAS_WIDTH)
+    .attr("height", CANVAS_HEIGHT);
+    	
+	createManyPoles(INITIAL_NUMBER_POLES);
+	
+	startGameLoop();
+	
+}
 
 function updatePoles()
 {
