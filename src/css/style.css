@@ -26,3 +26,12 @@ path {
 .tail {
   stroke-width: 2px;
 }
+
+#button_panel_container {
+	
+	position:absolute;
+	
+	top:75%;
+	left:25%;
+	height: 30%;
+}
