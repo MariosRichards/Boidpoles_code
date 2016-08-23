@@ -1,12 +1,12 @@
-function poleDetectCollision(x,y,spermatozoon){
+function poleDetectCollision(x,y,pole){
 	
-	spermatozoon.collision_cooldown -= 1;
+	pole.collision_cooldown -= 1;
 	
-	if(spermatozoon.collision_cooldown < 0)
+	if(pole.collision_cooldown < 0)
 	{
 		for(var i=0;i<spermatozoa.length;i++)
 		{
-			var self_key = spermatozoon.key;
+			var self_key = pole.key;
 			
 			if(spermatozoa[i].key != self_key)
 			{
@@ -21,14 +21,14 @@ function poleDetectCollision(x,y,spermatozoon){
 				
 				if (distance < circle1.radius + circle2.radius) {
 	
-				    spermatozoon.vx *= -1;
-		    		spermatozoon.vy *= -1;
+				    pole.vx *= -1;
+		    		pole.vy *= -1;
 		    		
-		    		spermatozoon.collision_cooldown = POLE_COLLISION_COOLDOWN;
+		    		pole.collision_cooldown = POLE_COLLISION_COOLDOWN;
 		    		
 		    		//deletePoleByKey(spermatozoa[i].key);
 		    		
-		    		//deletePoleByKey(spermatozoon.key);
+		    		//deletePoleByKey(pole.key);
 		    		
 		    		
 					//console.log("POLE HITS POLE!");

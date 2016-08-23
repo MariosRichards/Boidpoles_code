@@ -10,38 +10,35 @@ function bulletHeadTransform(d) {
   return "translate(" + d.x + "," + d.y + ")rotate(" + Math.atan2(d.vy, d.vx) * DEGREES + ")";
 }
 
-function bulletsMoveUpdate()
+function bulletMoveUpdate(bullet)
 {
-	for (var i = 0; i < bullets.length; i++) {
-	    var bullet = bullets[i],
-	        x = bullet.x + bullet.vx,
-	        y = bullet.y + bullet.vy;
-				
-	    // Bounce off the walls.
-	    bounceWalls(x,y,bullet);
-	
-		bulletDetectCollision(x,y,bullet,i);
-	
-		var dx,
-	        dy,
-			speed;
-	
-		[dx,dy,speed] = unitVectors(bullet.vx,bullet.vy);
-	
-		var	count = speed * 10,
-			k1 = -5 - speed / 3;
+
+    var x = bullet.x + bullet.vx,
+        y = bullet.y + bullet.vy;
 			
-		/*x += dx  * k1;
-		y += dy  * k1;
+    // Bounce off the walls.
+    bounceWalls(x,y,bullet);
+
+	bulletDetectCollision(x,y,bullet);
+
+	var dx,
+        dy,
+		speed;
+
+	[dx,dy,speed] = unitVectors(bullet.vx,bullet.vy);
+
+	var	count = speed * 10,
+		k1 = -5 - speed / 3;
 		
-	    bullet.x = x - dy * k2; // rotated
-	    bullet.y = y + dx * k2;	*/
-	   
-	    bullet.x = x;
-	    bullet.y = y;
+	/*x += dx  * k1;
+	y += dy  * k1;
+	
+    bullet.x = x - dy * k2; // rotated
+    bullet.y = y + dx * k2;	*/
+   
+    bullet.x = x;
+    bullet.y = y;
 		
-	  }
 	  	  
-	  bullet_head.attr("transform", bulletHeadTransform);
 }
 

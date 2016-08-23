@@ -4,14 +4,13 @@ function startGameLoop() {
 		
 	  if(spermatozoa.length > 0)	
 	  {
-	  	  polesMoveUpdate();
-	  	  
-	  	  polesShootUpdate();
+	  	  polesUpdate();
+	  	
 	  }
 	  
 	  if(bullets.length > 0)
 	  {
-	  	bulletsMoveUpdate();
+	  	 bulletsUpdate();
 	  	
 	  }
 	 
