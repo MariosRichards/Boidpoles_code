@@ -8,7 +8,12 @@ function polesUpdate(){
 	
 		poleMoveUpdate(pole);
 		
-		poleShootUpdate(pole);
+		//poleShootUpdate(pole);
+		
+		pole.pole_cpu.pole_cpu_update();
+		
+		//var cpu = pole.pole_cpu;
+		//cpu.pole_cpu_update();
 	 
 	}
 	

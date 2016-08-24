@@ -9,9 +9,9 @@
 
 
 // pole_cpu constructor
-function pole_cpu() {
+function pole_cpu(pole) {
 	
-	// this.pole = pole // we'll test without the link to the pole
+	this.pole = pole // we'll test without the link to the pole
 	// array of 16 bit integers
 	this.program = new Int16Array([22 , 128, 8  ,
 								   255, 1  , 0  ,
@@ -86,12 +86,15 @@ function pole_cpu_update() {
 				switch(port) {
 					case 13:     
 						//  Sets turret offset to value      [0 - 255]
-						this.zero_cycle_count += 1
+						this.zero_cycle_count += 1;
 					break;
 					case 14:
 					
 						// Turn specified number of degrees
-						this.zero_cycle_count += 1
+						this.zero_cycle_count += 1;
+						// make shot!
+
+						poleShootUpdate(this.pole);
 					break;
 					default:
 						throw "ipo statement fail!"
@@ -116,7 +119,7 @@ function pole_cpu_update() {
 		}
 		
 		this.ip += 1
-		console.log(this.ip)
+
 		// to prevent infinite loops!
 		if (this.zero_cycle_count >=20){
 			this.zero_cycle_count -= 20;
@@ -134,6 +137,6 @@ pole_cpu.prototype = {
 	pole_cpu_update: pole_cpu_update
 }
 
-var cpu = new pole_cpu()
+// var cpu = new pole_cpu()
 
-cpu
+// cpu
