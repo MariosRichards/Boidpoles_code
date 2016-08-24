@@ -90,17 +90,53 @@ Don't worry
 
 Tank_cpu
 
-	memory[256]
+	memory[1024]
 	program[???]
 	ip
 
+BORING JOBS
+(1) Add all commands
+(2) Add all timings to array
+	
+	
 
+Things to implement entire thing
 
+(0)
+   Make cpu cycles persistent (i.e. 40 cpu cycle command make you start next turn at -35 and skip until positive)
 
+(1) Is there an easy way to handle all cpu time costs?
 
+ it's zero
+ or it's some fixed number based only on cmd
+ or it's some IPO/OPO/INT declaration
 
+ laziest option
+ if cmd not in IPO/OPO/INT:
+	key = cmd
+ else:
+	key = 100*cmd + op1
+	
+	
+ key = cmd
+ if key in timings_array:
+	time += timings_array[key[
+ else:
+    zero_time ++
+	
+	if not, then 0
+ elif cmd * 100 + op1 not in
+ 
+ 
+(2) Do I *really* want to implement multiple versions of commands for various combinations of V/N?
 
+-> just make a function and hand in the necessary values
 
+-> Better yet, do the symbolic manipulation at the beginning
+Then mod 63
+
+Just double-check ordered combinations 
+scale unambiguously with number of 64s
 
 
 
