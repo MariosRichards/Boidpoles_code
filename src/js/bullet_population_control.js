@@ -1,3 +1,31 @@
+function Bullet(x,y,pole)
+{
+	var vx = BULLET_VELOCITY;
+	var vy = BULLET_VELOCITY;
+	
+	if(pole)
+	{
+		vx = pole.vx*2;
+		vy = pole.vy*2;
+	}
+	
+	BULLET_UNIQUE_KEY += 1;
+	
+	this.x = x;
+	this.y = y;
+	this.vx = vx;
+    this.vy = vy;
+    this.count = 0;
+    this.key = BULLET_UNIQUE_KEY;
+	this.collision_cooldown = INITIAL_BULLET_COLLISION_COOLDOWN;
+	
+}
+
+Bullet.prototype = {
+	constructor: Bullet
+// add methods here!
+};
+
 function deleteBulletByKey(key)
 {
 	for(var i=0;i<bullets.length;i++)
@@ -14,28 +42,7 @@ function deleteBulletByKey(key)
 function createNewBullet(x,y,pole)
 {	
 	
-	var vx = BULLET_VELOCITY;
-	var vy = BULLET_VELOCITY;
-	
-	if(pole)
-	{
-		vx = pole.vx*2;
-		vy = pole.vy*2;
-	}
-	
-	BULLET_UNIQUE_KEY += 1;
-		
-	var new_bullet = {
-		
-		x: x,
-		y: y,
-		vx: vx,
-	    vy: vy,
-	    count: 0,
-	    key: BULLET_UNIQUE_KEY,
-    	collision_cooldown: INITIAL_BULLET_COLLISION_COOLDOWN
-		
-	};
+	var new_bullet = new Bullet(x,y,pole);
 	
 	bullets.push(new_bullet);
 					
