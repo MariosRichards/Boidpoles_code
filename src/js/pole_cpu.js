@@ -7,9 +7,15 @@
 // 156 14  128// opo        14,     turn_rate
 // 12  1   0  // jmp        1
 
-MAXINT = 32767
-MININT = -32768
-
+var MAXINT    = 32767;
+var MININT    = -32768;
+var CPUMEMORY = 1024; // MUST BE POWER OF 2!
+var CPUMEMORYAND = CPUMEMORY - 1; 
+var MAXCOMMANDS = 64; // MUST BE POWER OF 2!
+var MAXCOMMANDSAND = MAXCOMMANDS - 1;
+// define this as the Label command
+var ZEROCYCLESLIMIT = 20;
+var MAXPORTS = 24;
 
 
 // pole_cpu constructor
@@ -24,9 +30,37 @@ function pole_cpu(pole) {
 								   156, 13 , 65 ,
 								   156,	14 , 128,
 								   12 , 1 , 0 ]);
+
+	// this.program = new Int16Array([  ]); // jellyhead
+								   
+	// temp_prog_length_rem = this.program.length % 3;
+	if (this.program.length % 3 !=0)
+	{
+		//throw "program length not a multiple of three";		
+		temp_program = new Int16Array( Math.ceil(this.program.length/3)*3 );
+		temp_program.set(this.program);
+		this.program = temp_program
+	}
+	this.program_length = this.program.length / 3;
+	   
 	this.ip = 0;
-	this.memory = new Int16Array(1024);
-	this.labels = {1:1};
+	this.memory = new Int16Array(CPUMEMORY);
+	
+	// has to be built!
+	// walk through the entire program and build this
+	// Better way?
+	// Labels - will overwrite themselves if you use the same label!
+	// 
+	this.labels = {};	
+	for (i = 0; i < this.program_length; i++)
+	{
+		cmd = this.program[i*3];
+		if (cmd == 255)
+		{
+			op1 = this.program[(i*3) + 1];
+			this.labels[op1] = i;
+		}
+	}
 	
 	this.cpu_timings = { 22:1, 4:1 };
 	
@@ -52,30 +86,43 @@ function pole_cpu_update() {
 	this.zero_cycle_count = 0;
 
 	while ( this.cycle_count > 0 ) {
-//		console.log(this.ip);		
+				
+
+		// putting this at the top means a zero-length program
+		// does(should) not cause a crash!
+		if (this.ip >= this.program_length)
+		{
+			this.ip = 0; // return to beginning
+			this.cycle_count -= 1; // implicit NOP
+			continue; 
+		}
+		// check for end of code!
+		// remember - implicit NOP at end of program
+
+
 		var pos = this.ip*3;
 		var cmd = this.program[pos];
 		var op1 = this.program[pos+1];
 		var op2 = this.program[pos+2];
 		
 		// handle the V/N conversion
-// 28 OPO N1 N2
-// 92 OPO V1 N2
-// 156 OPO N1 V2
-// 220 OPO V1 V2		
+// CMD NN + 0
+// CMD VN + 64
+// CMD NV + 128
+// CMD VV + 192	
 		
-		temp = Math.floor( cmd / 64 );
+		temp = Math.floor( cmd / MAXCOMMANDS );
 		if (temp == 1){
-			op1 = Math.abs(op1 % 1024);
+			op1 = op1 & CPUMEMORYAND;
 		} 
 		else if (temp == 2) {
-			op2 = Math.abs(op2 % 1024);
+			op2 = op2 & CPUMEMORYAND;
 		} 
 		else if (temp == 3) {
-			op1 = Math.abs(op1 % 1024);
-			op2 = Math.abs(op2 % 1024);
+			op1 = op1 & CPUMEMORYAND;
+			op2 = op2 & CPUMEMORYAND;
 		}
-		cmd = cmd & 63; // cheap modulo 64
+		cmd = cmd & MAXCOMMANDSAND; // cheap modulo 64
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
@@ -92,9 +139,9 @@ function pole_cpu_update() {
 		}
 		else {
 			this.zero_cycle_count += 1;
-			if (this.zero_cycle_count >=20) {
-				this.zero_cycle_count -= 20;
-				this.cycle_count -= 1
+			if (this.zero_cycle_count >= ZEROCYCLESLIMIT) {
+				this.zero_cycle_count -= ZEROCYCLESLIMIT;
+				this.cycle_count -= 1;
 			}			
 		}
 
@@ -103,15 +150,15 @@ function pole_cpu_update() {
 
 		switch(cmd) {
 			case 22: // MOV V N
-				var v = Math.abs(op1 % 1024);
+				var v = op1 & CPUMEMORYAND;
 				this.memory[v] = op2;
 				// make sure variable identifier in range
 				break;
 				
 			case 27: // IPO N V
 				// force op1 into range 
-				var port = Math.abs(op1 % 24); // still some output only options in here!
-				var v = Math.abs(op2 % 1024);
+				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
+				var v = op2 & CPUMEMORYAND;
 				switch(port) {
 					case 10:     //Returns random number     [-32768 - 32767]
 						this.memory[v] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
@@ -123,14 +170,14 @@ function pole_cpu_update() {
 				break;
 				
 			case 4: // AND V N
-				var v = Math.abs(op1 % 1024);
-				this.memory[v] = this.memory[v] & 255;
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = this.memory[v] & op2;
 				break;
 				
 			case 28: // OPO N1 V2
 				// force op1 into range 
-				var port = Math.abs(op1 % 24); // still some output only options in here!
-				var v = Math.abs(op2 % 1024);
+				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
+				var v = op2 & CPUMEMORYAND;
 				switch(port) {
 					case 13:     
 						//  Sets turret offset to value      [0 - 255]
@@ -153,21 +200,18 @@ function pole_cpu_update() {
 				}
 				break;
 				
-			case 63: // label
+			case MAXCOMMANDSAND: // label
 				// empty
+
 				break;	
 				
 			default:
 				console.log(cmd);
 				throw "switch statement fail!"
 		}
+		// increment instruction pointer
+		this.ip += 1;
 		
-		
-		this.ip += 1
-		// check for end of code!
-		// remember - implicit NOP at end of program
-		
-
 	}
 }
 

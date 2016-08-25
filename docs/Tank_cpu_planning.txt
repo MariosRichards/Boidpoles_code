@@ -102,10 +102,11 @@ BORING JOBS
 
 Things to implement entire thing
 
-(0)
+(0) DONE
    Make cpu cycles persistent (i.e. 40 cpu cycle command make you start next turn at -35 and skip until positive)
 
-(1) Is there an easy way to handle all cpu time costs?
+(1) DONE
+Is there an easy way to handle all cpu time costs?
 
  it's zero
  or it's some fixed number based only on cmd
@@ -169,63 +170,105 @@ Num:  T:  I/O Name:             Function:
  23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
  24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 
+Formats
+- no operands
+CMD N
+CMD V
+CMD V N
+CMD N N 
+CMD V V
+
+CMD NN + 0
+CMD VN + 64
+CMD NV + 128
+CMD VV + 192
 
 
 Commands:
 
- 0  1  NOP           NOP        Simply wastes a clock-cycle.
- 1  1  ADD           ADD V N    Adds      V+N, result stored in V
- 2  1  SUB           SUB V N    Subtracts V-N, result stored in V
-33  1  INC           INC V      Increments V, (v=v+1)
-34  1  DEC           DEC V      Decrements V, (v=v-1)
-35  1  SHL           SHL V N    Bit-shifts  V left  N bit positions
-36  1  SHR           SHR V N    Bit-shifts  V right N bit positions
-37  1  ROL           ROL V N    Bit-rotates V left  N bit positions
-38  1  ROR           ROR V N    Bit-rotates V right N bit positions
 
-45  1  NEG           NEG V      Negates V:   V = 0-V  (aka "two's compliment")
- 3  1  OR            OR  V N    Bitwise OR,  V or  N, result stored in V
- 4  1  AND           AND V N    Bitwise AND, V and N, result stored in V
- 5  1  XOR           XOR V N    Bitwise XOR, V xor N, result stored in V
- 6  1  NOT           NOT V      Bitwise NOT, not(V),  result stored in V
- 7 10  MPY           MPY V N    Mulitplies V*N, result stored in V
- 8 10  DIV           DIV V N    Divides    V/N, result stored in V (integer)
- 9 10  MOD           MOD V N    MOD's    V & N, result stored in V (modulus)
- 
-10  1  RET  RETURN   RET        Returns from a subroutine (pops the ip)
-11  1  CALL GSB      CALL N     Calls subroutine at label #N (pushes ip)
-12  1  JMP  GOTO     JMP N      Jumps program (ip) to label #N
+0  1  NOP           NOP        Simply wastes a clock-cycle.
+1  ?  DEL  DELAY    DEL N      Equivelant to N NOPS.
+	65 ?  DEL  DELAY    DEL V      Equivelant to N NOPS.
+2  1  NEG           NEG #N      Negates V:   V = 0-V  (aka "two's compliment") 
+3  1  INC           INC #N      Increments V, (v=v+1)
+4  1  DEC           DEC #N      Decrements V, (v=v-1)
+5  1  NOT           NOT #N      Bitwise NOT, not(V),  result stored in V
+6  1  ADD           ADD #N N    Adds      V+N, result stored in V
+	134 1  ADD           ADD #N V    Adds      V+N, result stored in V
+7  1  SUB           SUB #N N    Subtracts V-N, result stored in V
+	135  1  SUB           SUB #N V    Subtracts V-N, result stored in V
+8  1  SHL           SHL #N N    Bit-shifts  V left  N bit positions
+	136  1  SHL           SHL #N V    Bit-shifts  V left  N bit positions
+9  1  SHR           SHR #N N    Bit-shifts  V right N bit positions
+	137  1  SHR           SHR #N V    Bit-shifts  V right N bit positions
+10  1  ROL           ROL #N N    Bit-rotates V left  N bit positions
+	138  1  ROL           ROL #N V    Bit-rotates V left  N bit positions
+11  1  ROR           ROR #N N    Bit-rotates V right N bit positions
+	139  1  ROR           ROR #N V    Bit-rotates V right N bit positions
+12  1  OR            OR  #N N    Bitwise OR,  V or  N, result stored in V
+	140  1  OR            OR  #N V    Bitwise OR,  V or  N, result stored in V
+13  1  AND           AND #N N    Bitwise AND, V and N, result stored in V
+	141  1  AND           AND #N V    Bitwise AND, V and N, result stored in V
+14  1  XOR           XOR #N N    Bitwise XOR, V xor N, result stored in V
+	142  1  XOR           XOR #N V    Bitwise XOR, V xor N, result stored in V
+15 10  MPY           MPY #N N    Mulitplies V*N, result stored in V
+	143 10  MPY           MPY #N V    Mulitplies V*N, result stored in V
+16 10  DIV           DIV #N N    Divides    V/N, result stored in V (integer)
+	144 10  DIV           DIV #N V    Divides    V/N, result stored in V (integer)
+17 10  MOD           MOD #N N    MOD's    V & N, result stored in V (modulus)
+	145 10  MOD           MOD #N V    MOD's    V & N, result stored in V (modulus)
+18  1  MOV  SET      MOV #N N    Sets V = N
+	146  1  MOV  SET      MOV #N V    Sets V = N
 
-20  1  CMP           CMP N N    Compares two numbers, results in flags reg.
-13  0  JLS  JB       JLS N      Jumps to label N if last compare was <
-14  0  JGR  JA       JGR N      Jumps to label N if last compare was >
-15  0  JNE           JNE N      Jumps to label N if last compare was <>
-16  0  JEQ  JE       JEQ N      Jumps to label N if last compare was =
-41  0  JAE  JGE      JAE N      Jumps to label N if last compare was >=
-42  0  JBE  JLE      JBE N      Jumps to label N if last compare was <=
-39  0  JZ            JZ  N      Jumps to label N if last compare was 0
-40  0  JNZ           JNZ N      Jumps to label N if last compare was not 0
+19  3  XCHG SWAP     XCHG #N #N   Exchanges the values of two variables (#N WITH #N)
 
-17  3  XCHG SWAP     XCHG V V   Exchanges the values of two variables
+20  2  TEST          TEST N N   Ands two numbers, result not stored, flags set
+	84  2  TEST          TEST V N   Ands two numbers, result not stored, flags set
+	148  2  TEST          TEST N V   Ands two numbers, result not stored, flags set
+	212  2  TEST          TEST V V   Ands two numbers, result not stored, flags set
+21  1  CMP           CMP N N    Compares two numbers, results in flags reg.
+	85  1  CMP           CMP V N    Compares two numbers, results in flags reg.
+	149 1  CMP           CMP N V    Compares two numbers, results in flags reg.
+	213 1  CMP           CMP V V    Compares two numbers, results in flags reg.
+
+22  1  JMP  GOTO     JMP N      Jumps program (ip) to label #N
+	86  1  JMP  GOTO     JMP V      Jumps program (ip) to label #N
+23  0  JLS  JB       JLS N      Jumps to label N if last compare was <
+	87  0  JLS  JB       JLS V      Jumps to label N if last compare was <
+24  0  JGR  JA       JGR N      Jumps to label N if last compare was >
+	88  0  JGR  JA       JGR V      Jumps to label N if last compare was >
+25  0  JNE           JNE N      Jumps to label N if last compare was <>
+	89  0  JNE           JNE V      Jumps to label N if last compare was <>
+26  0  JEQ  JE       JEQ N      Jumps to label N if last compare was =
+	90  0  JEQ  JE       JEQ V      Jumps to label N if last compare was =
+27  0  JAE  JGE      JAE N      Jumps to label N if last compare was >=
+	91  0  JAE  JGE      JAE V      Jumps to label N if last compare was >=
+28  0  JBE  JLE      JBE N      Jumps to label N if last compare was <=
+	92  0  JBE  JLE      JBE V      Jumps to label N if last compare was <=
+29  0  JZ            JZ  N      Jumps to label N if last compare was 0
+	93  0  JZ            JZ  V      Jumps to label N if last compare was 0
+30  0  JNZ           JNZ N      Jumps to label N if last compare was not 0
+	94  0  JNZ           JNZ V      Jumps to label N if last compare was not 0
+
+31  ?  INT           INT N      Executes interrupt number N
+	65  ?  INT           INT #N      Executes interrupt number N
+32  4+ IPO  IN       IPO N #N    Inputs number from port N, result into #N
+33  4+ OPO  OUT      OPO N1 N2  Outputs N2 to port N1
+	97  4+ OPO  OUT      OPO #N1 N2  Outputs N2 to port N1
+	161 4+ OPO  OUT      OPO N1 #N2  Outputs N2 to port N1
+	225 4+ OPO  OUT      OPO #N1 #N2  Outputs N2 to port N1
+	
+	
+<implement cx>
 18  1  DO            DO N       Sets CX = N
 19  1  LOOP          LOOP N     Decrements CX, If CX>0 then Jumps to label N
-21  2  TEST          TEST N N   Ands two numbers, result not stored, flags set
-22  1  MOV  SET      MOV V N    Sets V = N
 
-23  2  LOC  ADDR     LOC V V    Sets first V = memory address of second V
-24  2  GET           GET V N    Sets V = number from memory location N
-25  2  PUT           PUT N1 N2  Sets memory location N2 = N1
-
-26  ?  INT           INT N      Executes interrupt number N
-27  4+ IPO  IN       IPO N V    Inputs number from port N, result into V
-28  4+ OPO  OUT      OPO N1 N2  Outputs N2 to port N1
-
-29  ?  DEL  DELAY    DEL N      Equivelant to N NOPS.
-
+<implement stack>
 30  1  PUSH          PUSH N     Puts N onto the stack (sp incremented)
 31  1  POP           POP  V     Removes a number from the stack, into V
-
-32  0  ERR  ERROR    ERR N      Generate an error code, useful for debugging
+10  1  RET  RETURN   RET        Returns from a subroutine (pops the ip)
+11  1  CALL GSB      CALL N     Calls subroutine at label #N (pushes ip)
 
 
 
