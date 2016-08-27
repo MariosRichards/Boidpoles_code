@@ -127,6 +127,7 @@ function pole_cpu_update() {
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
 		// IPO/OPO/INT - 26,27,28
+		// and DEL - 1 -> DEL N, N (no - just include this as zero - add in the command)
 		if (cmd == 26 || cmd == 27 || cmd == 28) {
 			timings_key = 100*cmd + op1;
 		}
@@ -136,6 +137,9 @@ function pole_cpu_update() {
 		
 		if (timings_key in this.cpu_timings) {
 			this.cycle_count -= this.cpu_timings[timings_key];
+		}
+		else if (cmd == 1 && op1 != 0) {// DEL N - N x NOP command
+			this.cycle_count -= Math.abs(op1);
 		}
 		else {
 			this.zero_cycle_count += 1;
@@ -149,6 +153,34 @@ function pole_cpu_update() {
 		// add time cost from cmd_cpu_cycles array!	
 
 		switch(cmd) {
+			case 0: //NOP
+				// no effect other than the time cycle cost of 1
+				break;
+			case 1: //DEL N
+				// no effect other than the time cycle cost of abs(N)
+				break;
+			case 2: //NEG V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = -this.memory[v];
+				break;
+			case 3: //INC V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v]++;
+				break;
+			case 4: //DEC V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v]--;
+				break;
+			case 5: //NOT V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = -this.memory[v];
+				break;
+			case 6: 
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = -this.memory[v];
+				break;
+
+				
 			case 22: // MOV V N
 				var v = op1 & CPUMEMORYAND;
 				this.memory[v] = op2;
