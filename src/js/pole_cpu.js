@@ -16,20 +16,35 @@ var MAXCOMMANDSAND = MAXCOMMANDS - 1;
 // define this as the Label command
 var ZEROCYCLESLIMIT = 20;
 var MAXPORTS = 24;
+var BITLENGTH = 16;
+// memory locations
+var FLAGS = 64;
 
+
+
+
+// comparison flag bits
+var ZERO_FL = 1<<3;     // Zero flag
+var GRTR_FL = 1<<2;
+var LESS_FL = 1<<1;
+var EQUL_FL = 1;
+
+
+
+var LABEL_CMD = 255;
 
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
 	this.pole = pole // we'll test without the link to the pole
 	// array of 16 bit integers
-	this.program = new Int16Array([22 , 128, 8  ,
-								   255, 1  , 0  ,
-								   27 , 10 , 65 ,
-								   4  , 65 , 255,
-								   156, 13 , 65 ,
-								   156,	14 , 128,
-								   12 , 1 , 0 ]);
+	this.program = new Int16Array([18     , 128, 8  ,
+								   255    , 1  , 0  ,
+								   32     , 10 , 65 ,
+								   13     , 65 , 255,
+								   33+128 , 13 , 65 ,
+								   33+128 ,	14 , 128,
+								   22     , 1  , 0 ]);
 
 	// this.program = new Int16Array([  ]); // jellyhead
 								   
@@ -55,7 +70,7 @@ function pole_cpu(pole) {
 	for (i = 0; i < this.program_length; i++)
 	{
 		cmd = this.program[i*3];
-		if (cmd == 255)
+		if (cmd == LABEL_CMD)
 		{
 			op1 = this.program[(i*3) + 1];
 			this.labels[op1] = i;
@@ -64,15 +79,20 @@ function pole_cpu(pole) {
 	
 	this.cpu_timings = { 22:1, 4:1 };
 	
-	//this.ax = 0;
+	// this.ax = 0;
 	
 	this.time_slice = 5;
-	//this.cmd_cpu_cycles = { 22: 1, 255: 1, 
+	// this.cmd_cpu_cycles = { 22: 1, 255: 1, 
 	// timings actually depend on input/output actions
 	this.cycle_count = 0;
 	this.zero_cycle_count = 0;
 	
 }
+
+// We need an update function to be called from pole_update to set some memory values!
+
+
+
 
 // user variables start at 128
 // lets define label as cmd == 255 (63 if we're casting down)
@@ -113,14 +133,14 @@ function pole_cpu_update() {
 		
 		temp = Math.floor( cmd / MAXCOMMANDS );
 		if (temp == 1){
-			op1 = op1 & CPUMEMORYAND;
+			op1 = this.memory[ op1 & CPUMEMORYAND ];
 		} 
 		else if (temp == 2) {
-			op2 = op2 & CPUMEMORYAND;
+			op2 = this.memory[ op2 & CPUMEMORYAND ];
 		} 
 		else if (temp == 3) {
-			op1 = op1 & CPUMEMORYAND;
-			op2 = op2 & CPUMEMORYAND;
+			op1 = this.memory[ op1 & CPUMEMORYAND ];
+			op2 = this.memory[ op2 & CPUMEMORYAND ];
 		}
 		cmd = cmd & MAXCOMMANDSAND; // cheap modulo 64
 		
@@ -173,63 +193,220 @@ function pole_cpu_update() {
 				break;
 			case 5: //NOT V
 				var v = op1 & CPUMEMORYAND;
-				this.memory[v] = -this.memory[v];
+				this.memory[v] = ~this.memory[v];
 				break;
-			case 6: 
+			case 6: //ADD #N N
 				var v = op1 & CPUMEMORYAND;
-				this.memory[v] = -this.memory[v];
+				this.memory[v] += op2;
 				break;
-
-				
-			case 22: // MOV V N
+			case 7: //SUB #N N
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] -= op2;
+				break;
+			case 8: //SHL #N N
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] <<= op2; // could force this into the range of -16/16
+				break;
+			case 9: //SHR #N N
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] >>= op2;
+				break;
+			case 10: //ROL #N V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = ( this.memory[v] << op2 ) || ( this.memory[v] >> (BITLENGTH - op2) );
+				break;
+			case 11: //ROR #N V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] = ( this.memory[v] >> op2 ) || ( this.memory[v] << (BITLENGTH - op2) );
+				break;
+			case 12: //OR  #N N
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] |= op2;
+				break;
+			case 13: //AND #N V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] &= op2;
+				break;
+			case 14: //XOR #N V
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] ^= op2;
+				break;
+			case 15: //MPY #N N
+				var v = op1 & CPUMEMORYAND;
+				this.memory[v] *= op2;
+				break;
+			case 16: //DIV #N N
+				var v = op1 & CPUMEMORYAND;
+				if (op2 == 0) { op2=1;}
+				this.memory[v] /= op2;
+				break;				
+			case 17: //MOD #N N
+				var v = op1 & CPUMEMORYAND;
+				if (op2 == 0) { op2=1;}
+				this.memory[v] %= op2;
+				break;
+			case 18: //MOV #N N
 				var v = op1 & CPUMEMORYAND;
 				this.memory[v] = op2;
-				// make sure variable identifier in range
+				break;
+			case 19: //XCHG #N #N
+				var v1 = op1 & CPUMEMORYAND;
+				var v2 = op2 & CPUMEMORYAND;
+				var tmp = this.memory[v1];
+				this.memory[v1] = this.memory[v2];
+				this.memory[v2] = tmp;
+				break;
+			case 20: //TEST N N // Ands two numbers, result not stored, flags set
+				this.memory[FLAGS] &= ~(GRTR_FL+LESS_FL); // After a TEST, the Greater flag and the Less flag are always 0.
+				// Equal flag:    Set when operands are equal.	
+				if ( op1 == op2 ) {	this.memory[FLAGS] |= EQUL_FL; }
+				// Zero flag:     Set when the binary "AND" of operands #1 & #2 = 0.
+				if ( (op1 & op2) == 0 ) { this.memory[FLAGS] |= ZERO_FL; }
+
+				break;					
+			case 21: //CMP N N // Compares two numbers, results in flags reg.
+				// Equal flag:    Set when operands are equal.
+				if ( op1 == op2 ) {	this.memory[FLAGS] |= EQUL_FL; }				
+				// Less flag:     Set when operand#1 < operand#2
+				if ( op1 < op2 ) {	this.memory[FLAGS] |= LESS_FL; }
+				// Greater flag:  Set when operand#1 > operand#2				
+				if ( op1 > op2 ) {	this.memory[FLAGS] |= GRTR_FL; }
+				// Zero flag:     Set when operands are equal AND are 0.
+				if ( op1 == op2 && op1 == 0 ) {	this.memory[FLAGS] |= ZERO_FL; }				
+				break;					
+			case 22: // JMP N      Jumps program (ip) to label #N
+				if (op1 in this.labels) {this.ip = this.labels[op1];}
+				break;
+			case 23: // JLS N      Jumps to label N if last compare was <
+				if (this.memory[FLAGS] & LESS_FL){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 24: // JGR N      Jumps to label N if last compare was >
+				if (this.memory[FLAGS] & GRTR_FL){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 25: // JNE N      Jumps to label N if last compare was <>
+				if ( !(this.memory[FLAGS] & EQUL_FL) ){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 26: // JEQ N      Jumps to label N if last compare was =
+				if (this.memory[FLAGS] & EQUL_FL){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 27: // JAE N      Jumps to label N if last compare was >=
+				if ( (this.memory[FLAGS] & EQUL_FL) && (this.memory[FLAGS] & GRTR_FL) ) {
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 28: // JBE N      Jumps to label N if last compare was <=
+				if ( (this.memory[FLAGS] & EQUL_FL) && (this.memory[FLAGS] & LESS_FL) ) {
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 29: // JZ  N      Jumps to label N if last compare was 0
+				if (this.memory[FLAGS] & ZERO_FL){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+			case 30: // JNZ N      Jumps to label N if last compare was not 0
+				if ( !(this.memory[FLAGS] & ZERO_FL) ){
+					if (op1 in this.labels) {this.ip = this.labels[op1];}
+					}
+				break;
+
+
+
+			case 31: // INT N      Executes interrupt number N
 				break;
 				
-			case 27: // IPO N V
+			case 32: // IPO N V// NOTE - V is fixed - would change order, but better to remain ATRobots compatible
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
-				var v = op2 & CPUMEMORYAND;
+				var v = op1 & CPUMEMORYAND;
 				switch(port) {
-					case 10:     //Returns random number     [-32768 - 32767]
+					case 1:  // 1   0    I  Spedometer        Returns current throttle setting[-75- 100]
+					break;
+					case 2:  // 2   0    I  Heat Sensor       Returns current heat-level       [0 - 500]
+					break;
+					case 3:  // 3   0    I  Compass           Returns current heading          [0 - 255]
+					break;
+					case 4:  // 4   0    I  Turret Sensor     Returns current turret offset    [0 - 255]
+					break;
+					case 5:  // 5   0    I  Turret Sensor     Returns absolute turret heading  [0 - 255]
+					break;
+					case 6:  // 6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
+					break;
+					case 7:  // 7   1    I  Scanner           Returns range to nearest target in scan arc
+					break;
+					case 8:  // 8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
+					break;
+					case 9:  // 9   3    I  Radar             Returns range to nearest target
+					break;
+					case 10: // 10   0    I  Random Generator  Returns random number     [-32768 - 32767]
 						this.memory[v] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
 					break;
-					
+					case 16: // 16  40    I  Sonar             Returns heading to nearest target[0 - 255]
+					break;
+					case 17: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
+					break;
+					case 18: // 18   0   I/O Overburn          Sets/Returns overburn status
+					break;
+					case 19: // 19   0   I/O Transponder       Sets/Returns current transponder ID
+					break;
+					case 20: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
+					break;
+					case 21: // 21   0   I/O Com Channel       Sets/Returns com channel setting
+					break;
+					case 22: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
+					break;
+					case 23: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
+					break;
+					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+					break;
 					default:
 						throw "ipo statement fail!"
 				}
 				break;
-				
-			case 4: // AND V N
-				var v = op1 & CPUMEMORYAND;
-				this.memory[v] = this.memory[v] & op2;
-				break;
-				
-			case 28: // OPO N1 V2
+
+			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
 				var v = op2 & CPUMEMORYAND;
 				switch(port) {
-					case 13:     
-						//  Sets turret offset to value      [0 - 255]
+					case 11: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
 					break;
-					
-					case 14:
-						// Turn specified number of degrees
-						// make shot!
+					case 12: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
+					break;
+					case 13: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
+					break;
+					case 14: // 14   0    O  Steering          Turn specified number of degrees
 						poleShootUpdate(this.pole);
 					break;
-					
+					case 15: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
+					break;
+					case 17: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
+					break;
+					case 18: // 18   0   I/O Overburn          Sets/Returns overburn status
+					break;
+					case 19: // 19   0   I/O Transponder       Sets/Returns current transponder ID
+					break;
+					case 20: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
+					break;
+					case 21: // 21   0   I/O Com Channel       Sets/Returns com channel setting
+					break;
+					case 22: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
+					break;
+					case 23: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
+					break;
+					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+					break;
 					default:
 						throw "ipo statement fail!"
 				}		
-				break;
-				
-			case 12: // jmp
-				if (op1 in this.labels) {
-					this.ip = this.labels[op1];
-				}
 				break;
 				
 			case MAXCOMMANDSAND: // label
