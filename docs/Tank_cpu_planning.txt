@@ -218,9 +218,9 @@ Commands:
 	144 10  DIV           DIV #N V    Divides    V/N, result stored in V (integer)
 17 10  MOD           MOD #N N    MOD's    V & N, result stored in V (modulus)
 	145 10  MOD           MOD #N V    MOD's    V & N, result stored in V (modulus)
-18  1  MOV  SET      MOV #N N    Sets V = N
-	146  1  MOV  SET      MOV #N V    Sets V = N
-
+18  2  MOV  SET      MOV #N N    Sets V = N
+	146  2  MOV  SET      MOV #N V    Sets V = N
+// MOV 1, LOC 2, GET 2, PUT 2 -> 2
 19  3  XCHG SWAP     XCHG #N #N   Exchanges the values of two variables (#N WITH #N)
 
 20  2  TEST          TEST N N   Ands two numbers, result not stored, flags set
@@ -339,3 +339,37 @@ Op: T: Name: Alt:    Syntax/Description:
 30  1  PUSH          PUSH N     Puts N onto the stack (sp incremented)
 31  1  POP           POP  V     Removes a number from the stack, into V
 32  0  ERR  ERROR    ERR N      Generate an error code, useful for debugging
+
+
+Num: T: Name:        Function:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  0   - Destruct     Detonate the robot (if I go down, you go down with me!)
+  1  10 Reset        Resets robot program.
+  2   5 Locate       Sets EX,FX registers equal to X,Y coordinates.
+  3   2 Keepshift    Sets Keepshift, input:     AX 0 = off, non-0 = on
+  4   1 Overburn     Sets Overburn,  input:     AX 0 = off, non-0 = on
+  5   2 ID           Returns robot ID number in FX
+  6   2 Timer        Returns game clock in EX:FX (32-bit number)
+  7  32 Find Angle   Returns angle to point specified in EX,FX; AX=result
+  8   1 Target-ID    Returns ID of last robot scanned (with any scan) in FX
+  9   2 Target-Info  Returns info on last scanned target (EX=dir,FX=throttle)
+ 10   4 Game-Info    Returns info: DX=Total number of robots active,
+                                   EX=Match number,
+                                   FX=Number of matches
+ 11   5 Robot-info   Returns info: DX=Robot speed (in cm per game-cycle),
+                                   EX=Time since last damage taken
+                                   FX=Time since a fired shot hit a robot.
+                                   (time measured in game-cycles)
+                                   (robot speed is current as of int call)
+ 12   1 Collisions   Returns collision count in FX
+ 13   1 Reset ColCnt Resets collision count back to 0.
+ 14   1 Transmit     Transmits the data in AX on the current channel.
+ 15   1 Receive      Returns the next item in com queue in FX
+ 16   1 DataReady    Returns the amount of data in queue in FX (0 for none).
+ 17   1 ClearCom     Empties the Com Queue
+ 18   3 Kills/Deaths Returns info: DX=Kill Count (spans multiple rounds)
+                                   EX=Kill Count (for this round only)
+                                   FX=Deaths     (spans multiple rounds)
+ 19   1 ClearMeters  Resets the 'meters' variable to 0.
+
+

@@ -19,7 +19,7 @@ var MAXPORTS = 24;
 var BITLENGTH = 16;
 // memory locations
 var FLAGS = 64;
-
+var SWAP  = 4;
 
 
 
@@ -77,7 +77,19 @@ function pole_cpu(pole) {
 		}
 	}
 	
-	this.cpu_timings = { 22:1, 4:1 };
+	this.cpu_timings = {
+		0:1,  2:1,  3:1,  4:1,  5:1,   6:1,  7:1, 8:1, 9:1,
+		10:1, 11:1, 12:1, 13:1, 14:1, 15:10, 16:10, 17:10,
+		18:1, 19: 3, 20:2, 21:1, 22:1,
+		3101:10, 3102:5, 3103:2, 3104:1, 3105:2, 3106:2,
+		3107:32, 3108:1, 3109:2, 3110:4, 3111:5, 3112:1,
+		3113:1,  3114:1, 3115:1, 3116:1, 3117:1, 3118:3,
+		3207:1,  3208:1, 3209:3, 3215:3, 3216:40,
+		3307:1,  3308:1, 3309:3, 3315:3, 3316:40 }
+		
+
+
+	};
 	
 	// this.ax = 0;
 	
@@ -177,7 +189,8 @@ function pole_cpu_update() {
 				// no effect other than the time cycle cost of 1
 				break;
 			case 1: //DEL N
-				// no effect other than the time cycle cost of abs(N)
+				// no effect other than the time cycle cost of 
+				this.cycle_count -= Math.abs(op1);
 				break;
 			case 2: //NEG V
 				var v = op1 & CPUMEMORYAND;
@@ -252,9 +265,9 @@ function pole_cpu_update() {
 			case 19: //XCHG #N #N
 				var v1 = op1 & CPUMEMORYAND;
 				var v2 = op2 & CPUMEMORYAND;
-				var tmp = this.memory[v1];
+				this.memory[SWAP] = this.memory[v1];
 				this.memory[v1] = this.memory[v2];
-				this.memory[v2] = tmp;
+				this.memory[v2] = this.memory[SWAP];
 				break;
 			case 20: //TEST N N // Ands two numbers, result not stored, flags set
 				this.memory[FLAGS] &= ~(GRTR_FL+LESS_FL); // After a TEST, the Greater flag and the Less flag are always 0.
