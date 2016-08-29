@@ -145,30 +145,36 @@ Ports
 
 Num:  T:  I/O Name:             Function:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  1   0    I  Spedometer        Returns current throttle setting[-75- 100]
-  2   0    I  Heat Sensor       Returns current heat-level       [0 - 500]
-  3   0    I  Compass           Returns current heading          [0 - 255]
-  4   0    I  Turret Sensor     Returns current turret offset    [0 - 255]
-  5   0    I  Turret Sensor     Returns absolute turret heading  [0 - 255]
-  6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
-  7   1    I  Scanner           Returns range to nearest target in scan arc
-  8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
-  9   3    I  Radar             Returns range to nearest target
- 10   0    I  Random Generator  Returns random number     [-32768 - 32767]
- 11   0    O  Throttle          Sets throttle                  [-75 - 100]
- 12   0    O  Rotate Turret     Offsets turret (cumulative)
- 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]
- 14   0    O  Steering          Turn specified number of degrees
- 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
- 16  40    I  Sonar             Returns heading to nearest target[0 - 255]
- 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
- 18   0   I/O Overburn          Sets/Returns overburn status
- 19   0   I/O Transponder       Sets/Returns current transponder ID
- 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
- 21   0   I/O Com Channel       Sets/Returns com channel setting
- 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
- 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
- 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+ 0   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
+ 1   0   I/O Overburn          Sets/Returns overburn status
+ 2   0   I/O Transponder       Sets/Returns current transponder ID
+ 3   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
+ 4   0   I/O Com Channel       Sets/Returns com channel setting
+ 5   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
+ 6   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
+ 7   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+Inputs only
+===========
+  8   0    I  Spedometer        Returns current throttle setting[-75- 100]
+  9   0    I  Heat Sensor       Returns current heat-level       [0 - 500]
+  10   0    I  Compass           Returns current heading          [0 - 255]
+  11   0    I  Turret Sensor     Returns current turret offset    [0 - 255]
+  12   0    I  Turret Sensor     Returns absolute turret heading  [0 - 255]
+  13   0    I  Damage Sensor     Returns current armor level      [0 - 100]
+  14   1    I  Scanner           Returns range to nearest target in scan arc
+  15   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
+  16   3    I  Radar             Returns range to nearest target
+  17   0    I  Random Generator  Returns random number     [-32768 - 32767]
+  18  40    I  Sonar             Returns heading to nearest target[0 - 255]
+Outputs only
+============
+ 8   0    O  Throttle          Sets throttle                  [-75 - 100]
+ 9   0    O  Rotate Turret     Offsets turret (cumulative)
+ 10   0    O  Aim Turret        Sets turret offset to value      [0 - 255]
+ 11   0    O  Steering          Turn specified number of degrees
+ 12   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
+
+
 
 Formats
 - no operands
@@ -277,68 +283,6 @@ Commands:
 
 
 
-
-
-
-
-
-
-
-N = number, of any type. Could be a number or value from a variable.
- V = variable, meaning it must be a variable, register, or memory access.
-
- In the chart header below, T refers to the time it takes to execute
-an instruction
-
-Op: T: Name: Alt:    Syntax/Description:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 0  1  NOP           NOP        Simply wastes a clock-cycle.
- 1  1  ADD           ADD V N    Adds      V+N, result stored in V
- 2  1  SUB           SUB V N    Subtracts V-N, result stored in V
-33  1  INC           INC V      Increments V, (v=v+1)
-34  1  DEC           DEC V      Decrements V, (v=v-1)
-35  1  SHL           SHL V N    Bit-shifts  V left  N bit positions
-36  1  SHR           SHR V N    Bit-shifts  V right N bit positions
-37  1  ROL           ROL V N    Bit-rotates V left  N bit positions
-38  1  ROR           ROR V N    Bit-rotates V right N bit positions
-43  1  SAL           SAL V N    Bit-Shifts, same as SHL
-44  1  SAR           SAR V N    Same as SHR, except preserves bit 15.
-45  1  NEG           NEG V      Negates V:   V = 0-V  (aka "two's compliment")
- 3  1  OR            OR  V N    Bitwise OR,  V or  N, result stored in V
- 4  1  AND           AND V N    Bitwise AND, V and N, result stored in V
- 5  1  XOR           XOR V N    Bitwise XOR, V xor N, result stored in V
- 6  1  NOT           NOT V      Bitwise NOT, not(V),  result stored in V
- 7 10  MPY           MPY V N    Mulitplies V*N, result stored in V
- 8 10  DIV           DIV V N    Divides    V/N, result stored in V (integer)
- 9 10  MOD           MOD V N    MOD's    V & N, result stored in V (modulus)
-10  1  RET  RETURN   RET        Returns from a subroutine (pops the ip)
-11  1  CALL GSB      CALL N     Calls subroutine at label #N (pushes ip)
-12  1  JMP  GOTO     JMP N      Jumps program (ip) to label #N
-20  1  CMP           CMP N N    Compares two numbers, results in flags reg.
-13  0  JLS  JB       JLS N      Jumps to label N if last compare was <
-14  0  JGR  JA       JGR N      Jumps to label N if last compare was >
-15  0  JNE           JNE N      Jumps to label N if last compare was <>
-16  0  JEQ  JE       JEQ N      Jumps to label N if last compare was =
-41  0  JAE  JGE      JAE N      Jumps to label N if last compare was >=
-42  0  JBE  JLE      JBE N      Jumps to label N if last compare was <=
-39  0  JZ            JZ  N      Jumps to label N if last compare was 0
-40  0  JNZ           JNZ N      Jumps to label N if last compare was not 0
-46  1  JTL           JTL N      Jumps to line N of compiled program.
-17  3  XCHG SWAP     XCHG V V   Exchanges the values of two variables
-18  1  DO            DO N       Sets CX = N
-19  1  LOOP          LOOP N     Decrements CX, If CX>0 then Jumps to label N
-21  2  TEST          TEST N N   Ands two numbers, result not stored, flags set
-22  1  MOV  SET      MOV V N    Sets V = N
-23  2  LOC  ADDR     LOC V V    Sets first V = memory address of second V
-24  2  GET           GET V N    Sets V = number from memory location N
-25  2  PUT           PUT N1 N2  Sets memory location N2 = N1
-26  ?  INT           INT N      Executes interrupt number N
-27  4+ IPO  IN       IPO N V    Inputs number from port N, result into V
-28  4+ OPO  OUT      OPO N1 N2  Outputs N2 to port N1
-29  ?  DEL  DELAY    DEL N      Equivelant to N NOPS.
-30  1  PUSH          PUSH N     Puts N onto the stack (sp incremented)
-31  1  POP           POP  V     Removes a number from the stack, into V
-32  0  ERR  ERROR    ERR N      Generate an error code, useful for debugging
 
 
 Num: T: Name:        Function:
