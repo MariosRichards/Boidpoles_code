@@ -11,15 +11,36 @@ var MAXINT    = 32767;
 var MININT    = -32768;
 var CPUMEMORY = 1024; // MUST BE POWER OF 2!
 var CPUMEMORYAND = CPUMEMORY - 1; 
-var MAXCOMMANDS = 64; // MUST BE POWER OF 2!
-var MAXCOMMANDSAND = MAXCOMMANDS - 1;
+var MAXCOMMANDS = 34; // MUST BE POWER OF 2!
+// var MAXCOMMANDSAND = MAXCOMMANDS - 1;
 // define this as the Label command
 var ZEROCYCLESLIMIT = 20;
 var MAXPORTS = 24;
 var BITLENGTH = 16;
 // memory locations
-var FLAGS = 64;
+
+var DSPD = 0;//Desired speed robot is trying to achieve.
+var DHD = 1;//Desired heading robot is trying to achieve.
+var TPOS = 2; // current turret offset
+var ACC = 3; //accuracy value from last scan
 var SWAP  = 4;
+var TRID = 5;//ID of last target scanned (by any scan).
+var TRDIR = 6;//Relative heading of last target scanned.
+var TRSPD = 7;//Throttle of last target scanned.
+var COLCNT = 8;//Collision count.
+var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
+var COMBASE = 10;//Current base of the communications queue
+var COMEND = 11;//Current end-point of the communications queue
+// 12?
+var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned
+var FLAGS = 64;
+var AX = 65;//ax register
+var BX = 66;//bx register
+var CX = 67;//cx register
+var DX = 68;//dx register
+var EX = 69;//ex register
+var FX = 70;//fx register
+var SP = 71;//stack pointer
 
 
 
@@ -33,6 +54,10 @@ var EQUL_FL = 1;
 
 var LABEL_CMD = 255;
 
+var MAXIPO = 19; // max input
+var MAXOPO = 13; // max output
+var MAXINTERR =20; // max interrupt
+
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
@@ -40,12 +65,18 @@ function pole_cpu(pole) {
 	// array of 16 bit integers
 	this.program = new Int16Array([18     , 128, 8  ,
 								   255    , 1  , 0  ,
-								   32     , 10 , 65 ,
+								   32     , 17 , 65 ,
 								   13     , 65 , 255,
-								   33+128 , 13 , 65 ,
-								   33+128 ,	14 , 128,
+								   33+128 , 10 , 65 ,
+								   33+128 ,	12 , 128,
 								   22     , 1  , 0 ]);
 
+								   
+	randomArray = (length, max) => [...new Array(length)]
+		.map((_, i) => Math.round(Math.random() * max));
+		
+	this.program = new Int16Array( randomArray( Math.round(Math.random() * 255) , 256) );
+	
 	// this.program = new Int16Array([  ]); // jellyhead
 								   
 	// temp_prog_length_rem = this.program.length % 3;
@@ -80,12 +111,15 @@ function pole_cpu(pole) {
 	this.cpu_timings = {
 		0:1,  2:1,  3:1,  4:1,  5:1,   6:1,  7:1, 8:1, 9:1,
 		10:1, 11:1, 12:1, 13:1, 14:1, 15:10, 16:10, 17:10,
-		18:1, 19: 3, 20:2, 21:1, 22:1,
+		18:1, 19:3, 20:2, 21:1, 22:1,
 		3101:10, 3102:5, 3103:2, 3104:1, 3105:2, 3106:2,
 		3107:32, 3108:1, 3109:2, 3110:4, 3111:5, 3112:1,
 		3113:1,  3114:1, 3115:1, 3116:1, 3117:1, 3118:3,
-		3207:1,  3208:1, 3209:3, 3215:3, 3216:40,
-		3307:1,  3308:1, 3309:3, 3315:3, 3316:40 
+		3200:4,  3201:4, 3202:4, 3203:4, 3204:4, 3205:4, 3206:4, 
+		3207:1,  3208:4, 3209:4, 3210:4, 3211:4, 3212:4, 3213:4,
+		3214:5,  3215:5, 3216:7, 3217:4, 3218:44,
+		3300:4,  3301:4, 3302:4, 3303:4, 3304:4, 3305:4, 3306:4,
+		3307:4,  3308:4, 3309:4, 3310:4, 3311:4, 3312:7
 	};
 		
 
@@ -154,7 +188,7 @@ function pole_cpu_update() {
 			op1 = this.memory[ op1 & CPUMEMORYAND ];
 			op2 = this.memory[ op2 & CPUMEMORYAND ];
 		}
-		cmd = cmd & MAXCOMMANDSAND; // cheap modulo 64
+		cmd = cmd % MAXCOMMANDS; 
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
@@ -334,52 +368,118 @@ function pole_cpu_update() {
 
 
 			case 31: // INT N      Executes interrupt number N
+				var interrupt = Math.abs(op1 % MAXINTERR);
+				switch(interrupt) {
+					case 0: //0   - Destruct     Detonate the robot (if I go down, you go down with me!)
+					// function<<<<<<
+					break;
+					case 1: //  1  10 Reset        Resets robot program.
+					// ??????
+					// completely initialise everything?
+					break;
+					case 2://2   5 Locate       Sets EX,FX registers equal to X,Y coordinates.
+					// function<<<<<<
+					break;
+					case 3://3   2 Keepshift    Sets Keepshift, input:     AX 0 = off, non-0 = on
+					// function<<<<<<
+					break;				
+					case 4://4   1 Overburn     Sets Overburn,  input:     AX 0 = off, non-0 = on
+					// function<<<<<<
+					break;				
+					case 5://5   2 ID           Returns robot ID number in FX
+					// function<<<<<<
+					break;				
+					case 6://6   2 Timer        Returns game clock in EX:FX (32-bit number)
+					// function<<<<<<
+					break;
+					case 7://7  32 Find Angle   Returns angle to point specified in EX,FX; AX=result
+					// atan2(values forced into [0-1500]
+					break;
+					case 8://8   1 Target-ID    Returns ID of last robot scanned (with any scan) in FX
+						this.memory[FX] = this.memory[TRID];
+					break;
+					case 9://9   2 Target-Info  Returns info on last scanned target (EX=dir,FX=throttle)
+						this.memory[EX] = this.memory[TRDIR];
+						this.memory[FX] = this.memory[TRSPD];
+					break;
+					case 10://10   4 Game-Info    Returns info: DX=Total number of robots active,                                   EX=Match number,                                   FX=Number of matches
+					// function<<<<<<
+					break;
+					case 11://11   5 Robot-info   Returns info: DX=Robot speed (in cm per game-cycle),                                   EX=Time since last damage taken                                   FX=Time since a fired shot hit a robot.                                   (time measured in game-cycles)                                   (robot speed is current as of int call)
+					// function<<<<<<
+					break;
+					case 12://12   1 Collisions   Returns collision count in FX
+						this.memory[FX] = this.memory[COLCNT];
+					break;
+					case 13://13   1 Reset ColCnt Resets collision count back to 0.
+						this.memory[COLCNT] = 0;
+					break;
+					case 14://14   1 Transmit     Transmits the data in AX on the current channel.
+					// function<<<<<<
+					break;
+					case 15://15   1 Receive      Returns the next item in com queue in FX
+					// function<<<<<<
+					break;
+					case 16://16   1 DataReady    Returns the amount of data in queue in FX (0 for none).
+					// function<<<<<<
+					break;					
+					case 17://17   1 ClearCom     Empties the Com Queue
+					// function<<<<<<
+					break;					
+					case 18://18   3 Kills/Deaths Returns info: DX=Kill Count (spans multiple rounds)                                   EX=Kill Count (for this round only)                                   FX=Deaths     (spans multiple rounds)
+					// function<<<<<<
+					break;					
+					case 19://19   1 ClearMeters  Resets the 'meters' variable to 0.
+						this.memory[METERS] = 0;
+					break;										
+				}
 				break;
 				
 			case 32: // IPO N V// NOTE - V is fixed - would change order, but better to remain ATRobots compatible
 				// force op1 into range 
-				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
+				var port = Math.abs(op1 % MAXIPO); // still some output only options in here!
 				var v = op1 & CPUMEMORYAND;
 				switch(port) {
-					case 1:  // 1   0    I  Spedometer        Returns current throttle setting[-75- 100]
+					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
-					case 2:  // 2   0    I  Heat Sensor       Returns current heat-level       [0 - 500]
+					case 1: // 18   0   I/O Overburn          Sets/Returns overburn status
 					break;
-					case 3:  // 3   0    I  Compass           Returns current heading          [0 - 255]
+					case 2: // 19   0   I/O Transponder       Sets/Returns current transponder ID
 					break;
-					case 4:  // 4   0    I  Turret Sensor     Returns current turret offset    [0 - 255]
+					case 3: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
 					break;
-					case 5:  // 5   0    I  Turret Sensor     Returns absolute turret heading  [0 - 255]
+					case 4: // 21   0   I/O Com Channel       Sets/Returns com channel setting
 					break;
-					case 6:  // 6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
+					case 5: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
 					break;
-					case 7:  // 7   1    I  Scanner           Returns range to nearest target in scan arc
+					case 6: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
 					break;
-					case 8:  // 8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
+					case 7: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+					break;					
+					case 8:  // 1   0    I  Spedometer        Returns current throttle setting[-75- 100]
 					break;
-					case 9:  // 9   3    I  Radar             Returns range to nearest target
+					case 9:  // 2   0    I  Heat Sensor       Returns current heat-level       [0 - 500]
 					break;
-					case 10: // 10   0    I  Random Generator  Returns random number     [-32768 - 32767]
+					case 10:  // 3   0    I  Compass           Returns current heading          [0 - 255]
+					break;
+					case 11:  // 4   0    I  Turret Sensor     Returns current turret offset    [0 - 255]
+					break;
+					case 12:  // 5   0    I  Turret Sensor     Returns absolute turret heading  [0 - 255]
+					break;
+					case 13:  // 6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
+					break;
+					case 14:  // 7   1    I  Scanner           Returns range to nearest target in scan arc
+					break;
+					case 15:  // 8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
+					break;
+					case 16:  // 9   3    I  Radar             Returns range to nearest target
+					break;
+					case 17: // 10   0    I  Random Generator  Returns random number     [-32768 - 32767]
 						this.memory[v] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
 					break;
-					case 16: // 16  40    I  Sonar             Returns heading to nearest target[0 - 255]
+					case 18: // 16  40    I  Sonar             Returns heading to nearest target[0 - 255]
 					break;
-					case 17: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
-					break;
-					case 18: // 18   0   I/O Overburn          Sets/Returns overburn status
-					break;
-					case 19: // 19   0   I/O Transponder       Sets/Returns current transponder ID
-					break;
-					case 20: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
-					break;
-					case 21: // 21   0   I/O Com Channel       Sets/Returns com channel setting
-					break;
-					case 22: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
-					break;
-					case 23: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
-					break;
-					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
-					break;
+
 					default:
 						throw "ipo statement fail!";
 				}
@@ -387,45 +487,46 @@ function pole_cpu_update() {
 
 			case 33: // OPO N1 V2
 				// force op1 into range 
-				var port = Math.abs(op1 % MAXPORTS); // still some output only options in here!
+				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
 				var v = op2 & CPUMEMORYAND;
 				switch(port) {
-					case 11: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
+					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
-					case 12: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
+					case 1: // 18   0   I/O Overburn          Sets/Returns overburn status
 					break;
-					case 13: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
+					case 2: // 19   0   I/O Transponder       Sets/Returns current transponder ID
 					break;
-					case 14: // 14   0    O  Steering          Turn specified number of degrees
-						poleShootUpdate(this.pole);
+					case 3: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
 					break;
-					case 15: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
+					case 4: // 21   0   I/O Com Channel       Sets/Returns com channel setting
 					break;
-					case 17: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
+					case 5: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
 					break;
-					case 18: // 18   0   I/O Overburn          Sets/Returns overburn status
+					case 6: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
 					break;
-					case 19: // 19   0   I/O Transponder       Sets/Returns current transponder ID
+					case 7: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
+					break;						
+					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
 					break;
-					case 20: // 20   0   I/O Shutdown-Level    Sets/Returns shutdown-level.
+					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
 					break;
-					case 21: // 21   0   I/O Com Channel       Sets/Returns com channel setting
+					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
 					break;
-					case 22: // 22   0   I/O Mine Layer        Lays mine or Returns mines-remaining.
+					case 11: // 14   0    O  Steering          Turn specified number of degrees
 					break;
-					case 23: // 23   0   I/O Mine Trigger      Detonates/returns previously-placed mines.
+					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
+						poleShootUpdate(this.pole);					
 					break;
-					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
-					break;
+
 					default:
 						throw "ipo statement fail!";
 				}		
 				break;
 				
-			case MAXCOMMANDSAND: // label
-				// empty
+			// case MAXCOMMANDSAND: // label
+				// // empty
 
-				break;	
+				// break;	
 				
 			default:
 				console.log(cmd);
