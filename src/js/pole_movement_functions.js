@@ -30,6 +30,11 @@ function tailPath(d) {
   return "M" + d.join("L");
 }
 
+function visionConeTransform(d)
+{
+	return "translate(" + d.path[0] + ")rotate(" + Math.atan2(d.vy, d.vx) * DEGREES + ")";
+}
+
 function poleMoveUpdate(pole)
 {
 			

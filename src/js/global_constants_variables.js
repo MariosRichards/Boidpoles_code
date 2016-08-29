@@ -23,7 +23,8 @@ var BULLET_VELOCITY = 1;
 
 var INITIAL_NUMBER_POLES = 100, //Default 120
 	TAIL_LENGTH = 12, //Default 12
-	DEGREES = 180 / Math.PI; //Default 180 / Math.PI
+	DEGREES = 180 / Math.PI,
+	RADIANS = Math.PI / 180;
 	
 var INITIAL_NUMBER_BULLETS = 0;
 	

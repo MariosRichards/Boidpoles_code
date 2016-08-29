@@ -7,6 +7,7 @@ var svg;
     
 var head;
 var tail;
+var vision_cone;
 
 var bullet_head;
 
@@ -57,7 +58,22 @@ function updatePoles()
 	
 	tail = group.selectAll(".pole_tail");
 	 
-
+	var pi = Math.PI;
+	
+	var arc = d3.svg.arc()
+	    .innerRadius(0)
+	    .outerRadius(70)
+	    .startAngle(45 * RADIANS) //converting from degs to radians
+	    .endAngle(135 * RADIANS) ;
+	    
+	groupNew
+    .append("path")
+    .attr("d", arc)
+    .attr("fill", "red")
+    .attr("class", "pole_vision_cone")
+    .attr("id",function(d) { return "pole_vision_cone"+d.key; });
+	 
+	vision_cone = group.selectAll(".pole_vision_cone");
 }
 
 function updateBullets()

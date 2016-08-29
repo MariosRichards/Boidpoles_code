@@ -13,7 +13,7 @@ body {
     left: 25%;
 }
 
-path {
+.pole_tail {
   fill: none;
   stroke: #fff;
   stroke-linecap: round;

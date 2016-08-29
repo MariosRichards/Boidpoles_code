@@ -10,7 +10,7 @@ function startGameLoop() {
 	  
 	  if(bullets.length > 0)
 	  {
-	  	 bulletsUpdate();
+	  	 //bulletsUpdate();
 	  	
 	  }
 	 
