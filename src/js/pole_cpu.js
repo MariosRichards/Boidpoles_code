@@ -11,8 +11,8 @@ var MAXINT    = 32767;
 var MININT    = -32768;
 var CPUMEMORY = 1024; // MUST BE POWER OF 2!
 var CPUMEMORYAND = CPUMEMORY - 1; 
-var MAXCOMMANDS = 64; // MUST BE POWER OF 2!
-var MAXCOMMANDSAND = MAXCOMMANDS - 1;
+var MAXCOMMANDS = 34; // MUST BE POWER OF 2!
+// var MAXCOMMANDSAND = MAXCOMMANDS - 1;
 // define this as the Label command
 var ZEROCYCLESLIMIT = 20;
 var MAXPORTS = 24;
@@ -71,6 +71,12 @@ function pole_cpu(pole) {
 								   33+128 ,	12 , 128,
 								   22     , 1  , 0 ]);
 
+								   
+	randomArray = (length, max) => [...new Array(length)]
+		.map((_, i) => Math.round(Math.random() * max));
+		
+	this.program = new Int16Array( randomArray( Math.round(Math.random() * 255) , 256) );
+	
 	// this.program = new Int16Array([  ]); // jellyhead
 								   
 	// temp_prog_length_rem = this.program.length % 3;
@@ -182,7 +188,7 @@ function pole_cpu_update() {
 			op1 = this.memory[ op1 & CPUMEMORYAND ];
 			op2 = this.memory[ op2 & CPUMEMORYAND ];
 		}
-		cmd = cmd & MAXCOMMANDSAND; // cheap modulo 64
+		cmd = cmd % MAXCOMMANDS; 
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
@@ -517,10 +523,10 @@ function pole_cpu_update() {
 				}		
 				break;
 				
-			case MAXCOMMANDSAND: // label
-				// empty
+			// case MAXCOMMANDSAND: // label
+				// // empty
 
-				break;	
+				// break;	
 				
 			default:
 				console.log(cmd);
