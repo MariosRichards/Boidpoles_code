@@ -36,7 +36,7 @@ var LABEL_CMD = 255;
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
-	this.pole = pole // we'll test without the link to the pole
+	this.pole = pole; // we'll test without the link to the pole
 	// array of 16 bit integers
 	this.program = new Int16Array([18     , 128, 8  ,
 								   255    , 1  , 0  ,
@@ -54,7 +54,7 @@ function pole_cpu(pole) {
 		//throw "program length not a multiple of three";		
 		temp_program = new Int16Array( Math.ceil(this.program.length/3)*3 );
 		temp_program.set(this.program);
-		this.program = temp_program
+		this.program = temp_program;
 	}
 	this.program_length = this.program.length / 3;
 	   
@@ -85,11 +85,11 @@ function pole_cpu(pole) {
 		3107:32, 3108:1, 3109:2, 3110:4, 3111:5, 3112:1,
 		3113:1,  3114:1, 3115:1, 3116:1, 3117:1, 3118:3,
 		3207:1,  3208:1, 3209:3, 3215:3, 3216:40,
-		3307:1,  3308:1, 3309:3, 3315:3, 3316:40 }
+		3307:1,  3308:1, 3309:3, 3315:3, 3316:40 
+	};
 		
 
 
-	};
 	
 	// this.ax = 0;
 	
@@ -381,7 +381,7 @@ function pole_cpu_update() {
 					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 					break;
 					default:
-						throw "ipo statement fail!"
+						throw "ipo statement fail!";
 				}
 				break;
 
@@ -418,7 +418,7 @@ function pole_cpu_update() {
 					case 24: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 					break;
 					default:
-						throw "ipo statement fail!"
+						throw "ipo statement fail!";
 				}		
 				break;
 				
@@ -429,7 +429,7 @@ function pole_cpu_update() {
 				
 			default:
 				console.log(cmd);
-				throw "switch statement fail!"
+				throw "switch statement fail!";
 		}
 		// increment instruction pointer
 		this.ip += 1;
@@ -442,7 +442,7 @@ function pole_cpu_update() {
 pole_cpu.prototype = {
 	constructor: pole_cpu,
 	pole_cpu_update: pole_cpu_update
-}
+};
 
 // var cpu = new pole_cpu()
 
