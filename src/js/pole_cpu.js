@@ -19,6 +19,9 @@ var MAXPORTS = 24;
 var BITLENGTH = 16;
 // memory locations
 
+var RAD2DEG = 128/Math.PI; // turn radians to 'degrees'(0-255)
+
+
 var DSPD = 0;//Desired speed robot is trying to achieve.
 var DHD = 1;//Desired heading robot is trying to achieve.
 var TPOS = 2; // current turret offset
@@ -141,9 +144,6 @@ function pole_cpu(pole) {
 		3307:4,  3308:4, 3309:4, 3310:4, 3311:4, 3312:7
 	};
 		
-
-
-	
 	// this.ax = 0;
 	
 	this.time_slice = 5;
@@ -156,12 +156,44 @@ function pole_cpu(pole) {
 
 // We need an update function to be called from pole_update to set some memory values!
 
+function pole_cpu_memory_update(hw_set_memory)
+{
+	// set variables
+	// this.memory[DSPD] = hw_set_memory.dspd;
+	// this.memory[DHD]  = hw_set_memory.dspd;
+	// this.memory[TPOS] = hw_set_memory.dspd;
+	// this.memory[DSPD] = hw_set_memory.dspd;
+	// this.memory[DSPD] = hw_set_memory.dspd;
+	// this.memory[DSPD] = hw_set_memory.dspd;
+
+// set after changing throttle/heading/turret offset
+var DSPD = 0;//Desired throttle robot is trying to achieve.
+var DHD = 1;//Desired heading robot is trying to achieve.
+var TPOS = 2; // current turret offset
+
+// set after scan
+var ACC = 3; //accuracy value from last scan
+var TRID = 5;//ID of last target scanned (by any scan).
+var TRDIR = 6;//Relative heading of last target scanned.
+var TRSPD = 7;//Throttle of last target scanned.
+var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned	
+
+// set after movement/collision
+var COLCNT = 8;//Collision count.
+var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
+
+// communication
+var COMBASE = 10;//Current base of the communications queue
+var COMEND = 11;//Current end-point of the communications queue
+
+}
 
 // We also need a function to be called from pole_update to get the config values!
 
-
-
-
+function pole_cpu_config()
+{
+	return this.config_array;
+}
 
 // user variables start at 128
 // lets define label as cmd == 255 (63 if we're casting down)
@@ -417,6 +449,9 @@ function pole_cpu_update() {
 					break;
 					case 7://7  32 Find Angle   Returns angle to point specified in EX,FX; AX=result
 					// atan2(values forced into [0-1500]
+						var x = this.memory[EX] % 1000; // originally forced to be positive - I don't see why!
+						var y = this.memory[FX] % 1000;
+						this.memory[AX] = (256+Math.atan2(y,x)*RAD2DEG) % 256 ; // 128, 384
 					break;
 					case 8://8   1 Target-ID    Returns ID of last robot scanned (with any scan) in FX
 						this.memory[FX] = this.memory[TRID];
