@@ -61,6 +61,10 @@ var MAXIPO = 19; // max input
 var MAXOPO = 13; // max output
 var MAXINTERR =20; // max interrupt
 
+
+var CONFIG_OPTIONS = 7;
+var CONFIG_POINTS = 12;
+
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
@@ -72,10 +76,22 @@ function pole_cpu(pole) {
 									1,  2,  2,
 									3,  3,  4  ]);
 
+									
+//									Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
+	// code to create a random program!					   
+	randomArray = (length,min,max) => [...new Array(length)]
+		.map((_, i, j) => Math.floor( Math.random() * (max - min + 1) ) + min );
+		
+	this.config = new Int16Array( randomArray( Math.floor(Math.random() * 24) , MININT, MAXINT) );
+	// end code to create a random program!									
+									
 	this.config_array = new Int16Array(7);
 	// Scan 5, Weap 2, Arm 2, Eng 2, Heat 1, Mines 0, Shield 0
-	for (i = 0; i < this.config.length; i++)
+	var config_length = Math.min(this.config.length,CONFIG_POINTS);
+	for (i = 0; i < config_length; i++)
 	{
+		//
+		var tmp = Math.abs(this.config[i]%CONFIG_OPTIONS);
 		if (this.config_array[ this.config[i] ] < 5)
 		{
 			this.config_array[ this.config[i] ]++;
@@ -93,10 +109,8 @@ function pole_cpu(pole) {
 								   22     , 1  , 0 ]);
 
 	// code to create a random program!					   
-	randomArray = (length, max) => [...new Array(length)]
-		.map((_, i) => Math.round(Math.random() * max));
-		
-	this.program = new Int16Array( randomArray( Math.round(Math.random() * 255) , 256) );
+	
+	this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
 	// end code to create a random program!
 	
 	// this.program = new Int16Array([  ]); // jellyhead
@@ -243,7 +257,7 @@ function pole_cpu_update() {
 			op1 = this.memory[ op1 & CPUMEMORYAND ];
 			op2 = this.memory[ op2 & CPUMEMORYAND ];
 		}
-		cmd = cmd % MAXCOMMANDS; 
+		cmd = Math.abs(cmd % MAXCOMMANDS);
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
