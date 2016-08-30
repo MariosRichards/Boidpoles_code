@@ -63,6 +63,24 @@ function pole_cpu(pole) {
 	
 	this.pole = pole; // we'll test without the link to the pole
 	// array of 16 bit integers
+	
+	this.config = new Int16Array([  0,  0,  0,
+									0,  0,  1,
+									1,  2,  2,
+									3,  3,  4  ]);
+
+	this.config_array = new Int16Array(7);
+	// Scan 5, Weap 2, Arm 2, Eng 2, Heat 1, Mines 0, Shield 0
+	for (i = 0; i < this.config.length; i++)
+	{
+		if (this.config_array[ this.config[i] ] < 5)
+		{
+			this.config_array[ this.config[i] ]++;
+		}
+	}
+
+
+
 	this.program = new Int16Array([18     , 128, 8  ,
 								   255    , 1  , 0  ,
 								   32     , 17 , 65 ,
@@ -71,11 +89,12 @@ function pole_cpu(pole) {
 								   33+128 ,	12 , 128,
 								   22     , 1  , 0 ]);
 
-								   
+	// code to create a random program!					   
 	randomArray = (length, max) => [...new Array(length)]
 		.map((_, i) => Math.round(Math.random() * max));
 		
 	this.program = new Int16Array( randomArray( Math.round(Math.random() * 255) , 256) );
+	// end code to create a random program!
 	
 	// this.program = new Int16Array([  ]); // jellyhead
 								   
@@ -136,6 +155,10 @@ function pole_cpu(pole) {
 }
 
 // We need an update function to be called from pole_update to set some memory values!
+
+
+// We also need a function to be called from pole_update to get the config values!
+
 
 
 
