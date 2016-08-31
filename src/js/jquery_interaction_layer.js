@@ -51,6 +51,12 @@ $(document).ready(function(){
 		deleteAllBullets();
 		
 	});
+	$("#toggle_visioncones").click(function(e){
+		
+		if(VISIONCONES_ACTIVE) VISIONCONES_ACTIVE = false;
+		else VISIONCONES_ACTIVE = true;
+		
+	});
 	
 	
 	

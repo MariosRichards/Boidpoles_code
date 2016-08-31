@@ -70,6 +70,7 @@ function updatePoles()
     .append("path")
     .attr("d", arc)
     .attr("fill", "red")
+    .attr("fill-opacity", "0.1")
     .attr("class", "pole_vision_cone")
     .attr("id",function(d) { return "pole_vision_cone"+d.key; });
 	 
