@@ -33,3 +33,12 @@ var UNIQUE_KEY = -1;
 var BULLET_UNIQUE_KEY = -1;
 
 var VISIONCONES_ACTIVE = true;
+
+
+//Pole specific range vars
+
+var BaseAngleRange = { min: 0, max: 255};
+var RadiansRange = { min: 0, max: 2*Math.PI};
+
+var ThrottleRange = { min: -75, max: 100};
+var HeatRange = { min: 0, max: 500};

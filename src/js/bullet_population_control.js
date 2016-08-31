@@ -7,7 +7,13 @@ function Bullet(x,y,pole)
 	{
 		vx = pole.vx*2;
 		vy = pole.vy*2;
+		
+		var velo = rotateVectorByAngle([vx,vy],baseRangeAngleToRadians(pole.turret_heading_offset));
+	
+		vx = velo[0];
+		vy = velo[1];
 	}
+	
 	
 	BULLET_UNIQUE_KEY += 1;
 	

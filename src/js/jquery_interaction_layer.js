@@ -53,6 +53,8 @@ $(document).ready(function(){
 	});
 	$("#toggle_visioncones").click(function(e){
 		
+		console.log(VISIONCONES_ACTIVE);
+		
 		if(VISIONCONES_ACTIVE) VISIONCONES_ACTIVE = false;
 		else VISIONCONES_ACTIVE = true;
 		

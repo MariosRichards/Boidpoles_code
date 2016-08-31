@@ -21,7 +21,8 @@ function polesUpdate(){
 	
 	head.attr("transform", headTransform);
     tail.attr("d", tailPath);
-    vision_cone.attr("transform", visionConeTransform);
+    //vision_cone.attr("transform", visionConeTransform);
+    turret.attr("transform", turretTransform);
     
 	
 }

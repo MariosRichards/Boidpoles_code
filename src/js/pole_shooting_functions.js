@@ -8,7 +8,6 @@ function poleShootUpdate(pole){
 		
 	if(pole.actual_shooting_cooldown < 0)
 	{
-		
 		createNewBullet(x,y,pole);
 		
 		pole.actual_shooting_cooldown = pole.initial_shooting_cooldown;
