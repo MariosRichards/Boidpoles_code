@@ -11,7 +11,7 @@ var MAXINT    = 32767;
 var MININT    = -32768;
 var CPUMEMORY = 1024; // MUST BE POWER OF 2!
 var CPUMEMORYAND = CPUMEMORY - 1; 
-var MAXCOMMANDS = 34; // MUST BE POWER OF 2!
+var MAXCOMMANDS = 35; // Label = Maxcommands -1
 // var MAXCOMMANDSAND = MAXCOMMANDS - 1;
 // define this as the Label command
 var ZEROCYCLESLIMIT = 20;
@@ -77,7 +77,6 @@ function pole_cpu(pole) {
 									3,  3,  4  ]);
 
 									
-//									Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
 	// code to create a random program!					   
 	randomArray = (length,min,max) => [...new Array(length)]
 		.map((_, i, j) => Math.floor( Math.random() * (max - min + 1) ) + min );
@@ -101,16 +100,16 @@ function pole_cpu(pole) {
 
 
 	this.program = new Int16Array([18     , 128, 8  ,
-								   255    , 1  , 0  ,
+								   MAXCOMMANDS-1    , 1  , 0  ,
 								   32     , 17 , 65 ,
 								   13     , 65 , 255,
-								   33+128 , 10 , 65 ,
-								   33+128 ,	12 , 128,
+								   33+MAXCOMMANDS*2 , 10 , 65 ,
+								   33+MAXCOMMANDS*2 , 12 , 128,
 								   22     , 1  , 0 ]);
 
 	// code to create a random program!					   
 	
-	this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
+	//this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
 	// end code to create a random program!
 	
 	// this.program = new Int16Array([  ]); // jellyhead
@@ -261,9 +260,9 @@ function pole_cpu_update() {
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
-		// IPO/OPO/INT - 26,27,28
+		// IPO/OPO/INT - 31,32,33
 		// and DEL - 1 -> DEL N, N (no - just include this as zero - add in the command)
-		if (cmd == 26 || cmd == 27 || cmd == 28) {
+		if (cmd == 31 || cmd == 32 || cmd == 33) {
 			timings_key = 100*cmd + op1;
 		}
 		else {
@@ -286,7 +285,7 @@ function pole_cpu_update() {
 
 
 		// add time cost from cmd_cpu_cycles array!	
-
+		console.log(cmd)
 		switch(cmd) {
 			case 0: //NOP
 				// no effect other than the time cycle cost of 1
@@ -587,14 +586,17 @@ function pole_cpu_update() {
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
-						poleShootUpdate(this.pole);					
+						poleShootUpdate(this.pole);		
+						
 					break;
-
 					default:
 						throw "ipo statement fail!";
+
 				}		
 				break;
-				
+			case MAXCOMMANDS-1:
+				// // empty
+			break;				
 			// case MAXCOMMANDSAND: // label
 				// // empty
 
