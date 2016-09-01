@@ -19,14 +19,51 @@ function unitVectors(vx,vy) {
 }
 
 function radiansToBaseRangeAngle(angle) //Turns radian angle into the angle in range 0-255
-{
-	angle = parseInt((angle/RadiansRange.max)*BaseAngleRange.max);
+{	
+	
+
+	if(angle>=RadiansRange.min)
+	{
+		while(angle > RadiansRange.max)
+		{
+			angle -= RadiansRange.max;
+		}
+		
+	}
+	else
+	{
+		while(angle < RadiansRange.min)
+		{
+			angle += RadiansRange.max;
+		} 
+		
+		angle = RadiansRange.max - angle;
+	}
+	
+	angle = Math.floor((angle/RadiansRange.max)*BaseAngleRange.max);
 	
 	return angle;
 }
 
 function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian angle
-{
+{		
+	if(angle>=BaseAngleRange.min)
+	{
+		while(angle > BaseAngleRange.max)
+		{
+			angle -= BaseAngleRange.max;
+		}
+	}
+	else
+	{
+		while(angle < BaseAngleRange.min)
+		{
+			angle += BaseAngleRange.max;
+		} 
+		
+		angle = BaseAngleRange.max - angle;
+	}
+	
 	angle = (angle/BaseAngleRange.max)*RadiansRange.max;
 	
 	return angle;

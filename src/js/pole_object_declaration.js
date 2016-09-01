@@ -24,9 +24,27 @@ function Pole()
 	
 	this.current_heat_level = 0;
 	
-	this.turret_heading_offset = radiansToBaseRangeAngle(Math.PI*1/3); //In reference to pole heading
-	this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
+	this.turret_heading_offset = radiansToBaseRangeAngle(0); //In reference to pole heading
+	//this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
+	this.turret_heading = radiansToBaseRangeAngle(0);
 	
+	this.attemp_shooting = function() {
+		
+		 var path = this.path,
+        x = path[0][0] + this.vx,
+        y = path[0][1] + this.vy;
+
+		this.actual_shooting_cooldown -= 1;
+			
+		if(this.actual_shooting_cooldown < 0)
+		{
+			createNewBullet(x,y,this);
+			
+			this.actual_shooting_cooldown = this.initial_shooting_cooldown;
+		}
+	};
+	
+	//Gets
 	
 	//returns 'throttle' = current_speed as a % of maximum forward speed
 	this.get_throttle = function() {
@@ -88,8 +106,44 @@ function Pole()
 	};
 	
 	
+	///Sets
 	
-	
+	//offsets turret - e.g. move it relative to its current position
+	this.rotate_turret = function(x)
+	{
+		var original_turret_heading = this.turret_heading_offset; 
+		
+		var rotation_amount_wanted = x;
+		
+		var calc = original_turret_heading += x;
+		
+		var absolute_value = Math.abs(calc);
+		
+		var final_amount = absolute_value;
+		
+		if(x>=255)
+		{
+			while(absolute_value>=255)
+			{
+				absolute_value -= 255;
+			}
+			
+			final_amount = absolute_value;
+			
+		} else if(x<0)
+		{
+			while(absolute_value<0)
+			{
+				absolute_value += 255;
+			}
+			
+			final_amount = 255 - absolute_value;
+		}
+		
+		this.turret_heading_offset = final_amount;
+		this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
+		//[-128,127]
+	};
 	
 	////
 	

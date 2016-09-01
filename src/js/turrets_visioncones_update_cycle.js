@@ -6,9 +6,13 @@ function visionConeTransform(d)
 
 function turretTransform(d)
 {
-	d.turret_heading = radiansToBaseRangeAngle((Math.atan2(d.vy, d.vx) * DEGREES)+(baseRangeAngleToRadians(d.turret_heading_offset) * DEGREES));
+	d.turret_heading = radiansToBaseRangeAngle((Math.atan2(d.vy, d.vx))+(baseRangeAngleToRadians(d.turret_heading_offset)));
 	
-	return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading))+90) + ")";
+	//return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading))+90) + ")";
+	
+	//d.turret_heading = radiansToBaseRangeAngle(Math.PI);
+	
+	return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading) * DEGREES)+90) + ")";
 }
 
 function visionConeUpdate(pole) {
@@ -48,7 +52,10 @@ function visionConeUpdate(pole) {
 				   var half_angle = angle/2;
 				  			
 				  
-			        var angle_radians = Math.atan2(dy, dx) - Math.atan2(pole.vy, pole.vx);
+				    //console.log(pole.turret_heading);
+			        //var angle_radians = Math.atan2(dy, dx) - Math.atan2(pole.vy, pole.vx);
+			        var angle_radians = Math.atan2(dy, dx) - baseRangeAngleToRadians(pole.turret_heading);
+			        			        
 			        while (angle_radians < - Math.PI) angle_radians += 2*Math.PI;
 			        while (angle_radians > Math.PI) angle_radians -= 2*Math.PI;
 			       
