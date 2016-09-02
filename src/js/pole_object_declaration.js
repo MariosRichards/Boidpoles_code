@@ -140,6 +140,7 @@ function Pole()
 		
 	};
 	
+	//returns range to nearest target	
 	this.radar = function() {
 	
 		var closest = 1000000000;
@@ -161,9 +162,108 @@ function Pole()
 		{
 			return closest;
 		} else return -1;
-		//returns range to nearest target	
+		
 	};
 	
+	//returns heading to nearest target
+	this.sonar = function() {
+		
+		//Unclear if "heading to nearest target" means angle to nearest target or angle
+		//difference between the that angle and the headings angle
+		
+		var closest = 1000000000;
+		var closest_target = null;
+		
+		var vx = 0;
+		var vy = 0;
+		
+		for(var i=0;i<spermatozoa.length;i++)
+		{
+			vx = spermatozoa[i].path[0][0] - this.path[0][0];
+			vy = spermatozoa[i].path[0][1] - this.path[0][1];
+			
+			if(unitVectors(vx,vy)[2] < closest)
+			{
+				closest = unitVectors(vx,vy)[2];
+				closest_target = spermatozoa[i];
+			}
+		}
+		
+		if(closest != 1000000000) 
+		{								
+			var angle_radians = Math.atan2(vx, vy);
+				
+			return angle_radians;
+			
+		} else return -1;
+		
+		//[0,255]	
+	};
+	
+	
+	//return scan_arc diameter 
+	this.get_scan_arc = function() {
+		
+		//[0,64]
+	};
+		
+	//0 = Off, 1 = On
+	this.get_overburn = function() {
+		
+	};
+		
+	
+	//get transponder_id
+	//(initially set to the order of the robot in creation - e.g. 6th robot created gets transponder_id = 6)
+	
+	this.get_transponder_if = function() {
+		
+		
+	};
+
+	//	shutdown_level is the point at which the heat level at which the robot shuts down
+	//it stays shut down until the heat falls to the shutdown heat level -50 (or 0 - whichever is higher)
+	//default shutdown_level is 400
+	
+	this.get_shutdown_level = function() {
+		
+		
+	};
+
+		
+	//get the channel the robot is set to receive communication on
+	this.get_channel = function() {
+		
+	};
+	
+	//return 0 if shield off
+	//return 1 if shield on
+	
+	this.get_shield = function() {
+		
+	};
+	
+	
+	//drop mine with detection radius x
+	//(mines have no size = so 0 detection range means a robot needs to sit *precisely* on top of the mine to detonate it)
+	
+	this.lay_mine = function(x) {
+		
+		
+	};
+		
+	//return number of mines remaining	
+	this.mines_remaining = function() {
+		
+	};
+		
+	//detonate *all* your mines
+	//you can't normally detonate mines (they recognise their owner), but when you detonate them like this, you can actually cause yourself damage
+		
+	this.detonate_mines = function() {
+		
+	};
+		
 	///Sets
 	
 	//sets throttle to [-75,100]
@@ -194,7 +294,42 @@ function Pole()
 		
 	};
 	
+	//0 = Off, anything else = On
+	this.set_overburn = function(x) {
+		
+	};
 	
+	//set transponder_id to x	
+	this.set_transponder_id = function(x) {
+		
+	};
+	
+	//set scar arc *diameter* in degrees [0,64] 
+	//- e.g. if you set it to be 64, then the scan arc will be 128 degreese (e.g. a semicircle)
+	this.set_scan_arc = function(x) {
+		
+	};
+
+	//	set shutdown_level [0, 500]
+	//	(robot explodes at 500!)
+	
+	this.set_shutdown_level = function(x) {
+		
+		
+	};
+	
+	//	set the channel on which the robot is set to receive communication on	
+	this.set_channel = function(x) {
+		
+	}	
+	
+	
+	//x=0 shield off, x!=0 shield on
+	this.set_shield = function(x) {
+		
+	};
+	
+
 	//offsets turret - e.g. move it relative to its current position
 	this.rotate_turret = function(x)
 	{
@@ -265,6 +400,39 @@ function Pole()
 		//[-128,127]
 	};
 	
+	//turn tank specified number of degrees
+	this.steering = function(x) {
+		
+		var rotated_vector = rotateVectorByAngle([vx,vy],x*RADIANS);
+		
+		this.vx = rotated_vector[0];
+		this.vy = rotated_vector[1];
+		
+		//[-128,127]
+	};
+	
+	//fire weapons at angle of turret with small adjustment [-4,4] adjustment
+	this.fire_weapon = function(x) {
+		
+		//Still have to program the angle adjustment
+		
+		var path = this.path,
+        x = path[0][0] + this.vx,
+        y = path[0][1] + this.vy;
+
+		this.actual_shooting_cooldown -= 1;
+			
+		if(this.actual_shooting_cooldown < 0)
+		{
+			createNewBullet(x,y,this);
+			
+			this.actual_shooting_cooldown = this.initial_shooting_cooldown;
+		}
+	};
+	
+	
+	 
+	
 	
 	////
 	
@@ -296,10 +464,42 @@ function Pole()
 		
 		return overburn;
 	};
-}
+	
+	//returns the number of your mines that remain laid on the map
+	
+	this.mines_on_map = function() {
+		
+	};
+		
+	//detonate robot
+	//(when robot dies it explodes dealing damage to other nearby robots)
+	this.self_destruct = function() {
+		
+		
+	};
 
-Pole.prototype = {
-	constructor: Pole
-// add methods here!
-};
+	//returns transponder_id of last target tank scanned
+	
+	this.scanned_id = function() {
+		
+	};
+
+	//returns direction (relative to scan - e.g. 0 means it was moving in the same direction as the scan - i.e. away) and current_throttle of the target when scanned
+	this.scanned_inf = function() {
+		
+	};
+	
+	//returns [current_speed, time since last damage taken, time since last fired shot hit another robot]
+	//(times are all in game cycles)
+		
+	this.robot_info = function() {
+		
+	};
+		
+}
+	
+	Pole.prototype = {
+		constructor: Pole
+	// add methods here!
+	};
 	

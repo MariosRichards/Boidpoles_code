@@ -69,6 +69,7 @@ function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian
 	return angle;
 }
 
+//Vector in format [x][y] ; Angle in radians
 var rotateVectorByAngle = function(vec, ang)
 {
     var cos = Math.cos(ang);
