@@ -334,10 +334,10 @@ function Pole()
 	this.rotate_turret = function(x)
 	{
 		var original_turret_heading = this.turret_heading_offset; 
-				
-		var calc = original_turret_heading += CPUBaseRangeAngleToBaseRangeAngle(x);
-				
-		var final_amount = calc;
+		
+		//console.log(original_turret_heading + "<-->" + properAngleNormalisation(original_turret_heading));
+								
+		var final_amount = original_turret_heading+CPUBaseRangeAngleToBaseRangeAngle(x);
 			
 		final_amount = baseRangeAngleToRadians(final_amount);
 				
@@ -348,36 +348,15 @@ function Pole()
 	
 	//set curret turret offset to value e.g. move turret to new angle relative to wherever the tank is heading
 	this.aim_turret = function(x){
-		
-		var original_pole_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx)));
+			
+		//This one to keep it constantly in the angle you want
 				
-		var calc = original_pole_heading += x;
-		
-		var absolute_value = Math.abs(calc);
-		
-		var final_amount = absolute_value;
-		
-		if(x>=255)
-		{
-			while(absolute_value>=255)
-			{
-				absolute_value -= 255;
-			}
-			
-			final_amount = absolute_value;
-			
-		} else if(x<0)
-		{
-			while(absolute_value<0)
-			{
-				absolute_value += 255;
-			}
-			
-			final_amount = 255 - absolute_value;
-		}
-		
-		this.turret_heading_offset = final_amount;
-		this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
+		//var original_pole_heading = properAngleNormalisation(Math.atan2(this.vy, this.vx));
+				
+		//var final_amount = radiansToBaseRangeAngle(properAngleNormalisation(original_pole_heading + baseRangeAngleToRadians(CPUBaseRangeAngleToBaseRangeAngle(x))));
+												
+		this.turret_heading_offset = CPUBaseRangeAngleToBaseRangeAngle(x);
+		//this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
 		//[-128,127]
 	};
 	
