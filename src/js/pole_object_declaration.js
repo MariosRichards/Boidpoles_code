@@ -321,7 +321,7 @@ function Pole()
 	//	set the channel on which the robot is set to receive communication on	
 	this.set_channel = function(x) {
 		
-	}	
+	};	
 	
 	
 	//x=0 shield off, x!=0 shield on
@@ -336,32 +336,15 @@ function Pole()
 		var original_turret_heading = this.turret_heading_offset; 
 				
 		var calc = original_turret_heading += x;
-		
-		var absolute_value = Math.abs(calc);
-		
-		var final_amount = absolute_value;
-		
-		if(x>=255)
-		{
-			while(absolute_value>=255)
-			{
-				absolute_value -= 255;
-			}
+				
+		var final_amount = calc;
 			
-			final_amount = absolute_value;
-			
-		} else if(x<0)
-		{
-			while(absolute_value<0)
-			{
-				absolute_value += 255;
-			}
-			
-			final_amount = 255 - absolute_value;
-		}
-		
-		this.turret_heading_offset = final_amount;
-		this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
+		final_amount = baseRangeAngleToRadians(final_amount);
+				
+		console.log(original_turret_heading + "<->" + final_amount);
+				
+		this.turret_heading_offset = radiansToBaseRangeAngleFloat(final_amount);
+		//this.turret_heading = radiansToBaseRangeAngle((properAngleNormalisation(Math.atan2(this.vy, this.vx)))+(this.turret_heading_offset));
 		//[-128,127]
 	};
 	

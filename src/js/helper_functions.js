@@ -37,7 +37,7 @@ function radiansToBaseRangeAngle(angle) //Turns radian angle into the angle in r
 			angle += RadiansRange.max;
 		} 
 		
-		angle = RadiansRange.max - angle;
+		//angle = RadiansRange.max - angle;
 	}
 	
 	angle = Math.floor((angle/RadiansRange.max)*BaseAngleRange.max);
@@ -47,8 +47,6 @@ function radiansToBaseRangeAngle(angle) //Turns radian angle into the angle in r
 
 function radiansToBaseRangeAngleFloat(angle) //Turns radian angle into the angle in range 0-255
 {	
-	
-
 	if(angle>=RadiansRange.min)
 	{
 		while(angle > RadiansRange.max)
@@ -64,7 +62,7 @@ function radiansToBaseRangeAngleFloat(angle) //Turns radian angle into the angle
 			angle += RadiansRange.max;
 		} 
 		
-		angle = RadiansRange.max - angle;
+		//angle = RadiansRange.max - angle;
 	}
 	
 	angle = (angle/RadiansRange.max)*BaseAngleRange.max;
@@ -88,7 +86,7 @@ function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian
 			angle += BaseAngleRange.max;
 		} 
 		
-		angle = BaseAngleRange.max - angle;
+		//angle = BaseAngleRange.max - angle;
 	}
 	
 	angle = (angle/BaseAngleRange.max)*RadiansRange.max;
@@ -108,6 +106,8 @@ function properAngleNormalisation(radan1)
 	
 	return angle_radians;
 }
+
+
 //Vector in format [x][y] ; Angle in radians
 function rotateVectorByAngle(vec, ang)
 {
