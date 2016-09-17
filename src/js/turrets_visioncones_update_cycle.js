@@ -16,7 +16,7 @@ function turretTransform(d)
 	
 	d.turret_heading = radiansToBaseRangeAngleFloat( 
 		properAngleNormalisation( 
-			(properAngleNormalisation(Math.atan2(d.vy, d.vx)))-(baseRangeAngleToRadians(d.turret_heading_offset) )
+			(properAngleNormalisation(Math.atan2(d.vy, d.vx)))+(baseRangeAngleToRadians(d.turret_heading_offset) )
 			)
 	);
 	
@@ -67,7 +67,7 @@ function visionConeUpdate(pole) {
 				    //console.log(pole.turret_heading);
 			        //var angle_radians = Math.atan2(dy, dx) - Math.atan2(pole.vy, pole.vx);
 			        
-			        var angle_radians = properAngleNormalisation(properAngleNormalisation(Math.atan2(dy, dx))-baseRangeAngleToRadians(pole.turret_heading));
+			        var angle_radians = properAngleNormalisation(properAngleNormalisation(Math.atan2(dy, dx))+baseRangeAngleToRadians(pole.turret_heading));
 			        			       
 					//angle_radians = Math.abs(angle_radians);
 			
