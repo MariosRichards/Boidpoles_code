@@ -1,11 +1,4 @@
 
-// 22  128 8  //mov        turn_rate,      8
-// 255 1   0  // :1
-// 27  10  65 // ipo        p_rand, ax
-// 4   65  255// and        ax,     255
-// 156 13  65 // opo        p_abs_turret,     ax 
-// 156 14  128// opo        14,     turn_rate
-// 12  1   0  // jmp        1
 
 var SCREEN_X  = 1000;
 var SCREEN_Y  = 1000;
@@ -25,21 +18,10 @@ var BITLENGTH = 16;
 var RAD2DEG = 128/Math.PI; // turn radians to 'degrees'(0-255)
 
 
-var DSPD = 0;//Desired speed robot is trying to achieve.
-var DHD = 1;//Desired heading robot is trying to achieve.
-var TPOS = 2; // current turret offset
-var ACC = 3; //accuracy value from last scan
+
 var SWAP  = 4;
-var TRID = 5;//ID of last target scanned (by any scan).
-var TRDIR = 6;//Relative heading of last target scanned.
-var TRSPD = 7;//Throttle of last target scanned.
-var COLCNT = 8;//Collision count.
-var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
-var COMBASE = 10;//Current base of the communications queue
-var COMEND = 11;//Current end-point of the communications queue
-// 12?
-var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned
 var FLAGS = 64;
+
 var AX = 65;//ax register
 var BX = 66;//bx register
 var CX = 67;//cx register
@@ -48,17 +30,15 @@ var EX = 69;//ex register
 var FX = 70;//fx register
 var SP = 71;//stack pointer
 
-
-
 // comparison flag bits
 var ZERO_FL = 1<<3;     // Zero flag
 var GRTR_FL = 1<<2;
 var LESS_FL = 1<<1;
-var EQUL_FL = 1;
+var EQUL_FL = 1; // <<0 !
 
 
 
-var LABEL_CMD = 255;
+var LABEL_CMD = MAXCOMMANDS-1;
 
 var MAXIPO = 19; // max input
 var MAXOPO = 13; // max output
@@ -236,39 +216,45 @@ function pole_cpu(pole) {
 	
 }
 
+// set after changing throttle/heading/turret offset
+var DSPD = 0;     //Desired throttle robot is trying to achieve.
+var DHD = 1;      //Desired heading robot is trying to achieve.
+var TPOS = 2;     //Current turret offset
+
+// set after scan
+var ACC = 3;      //accuracy value from last scan
+var TRID = 5;     //ID of last target scanned (by any scan).
+var TRDIR = 6;    //Relative heading of last target scanned.
+var TRSPD = 7;    //Throttle of last target scanned.
+var TRVEL = 13;   //Absolute speed (cm/cycle) of last target scanned	
+
+// set after movement/collision
+var COLCNT = 8;   //Collision count.
+var METERS = 9;   //Meters travelled. 15 bits used.. (32767+1)=0
+
+// communication
+var COMBASE = 10; //Current base of the communications queue
+var COMEND = 11;  //Current end-point of the communications queue
+
 // We need an update function to be called from pole_update to set some memory values!
 
 function pole_cpu_memory_update(hw_set_memory)
 {
 	// set variables
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DHD]  = hw_set_memory.dspd;
-	// this.memory[TPOS] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
+	this.memory[DSPD] = hw_set_memory.dspd;
+	this.memory[DHD]  = hw_set_memory.dhd;
+	this.memory[TPOS] = hw_set_memory.tpos;
+};
 
-// set after changing throttle/heading/turret offset
-var DSPD = 0;//Desired throttle robot is trying to achieve.
-var DHD = 1;//Desired heading robot is trying to achieve.
-var TPOS = 2; // current turret offset
-
-// set after scan
-var ACC = 3; //accuracy value from last scan
-var TRID = 5;//ID of last target scanned (by any scan).
-var TRDIR = 6;//Relative heading of last target scanned.
-var TRSPD = 7;//Throttle of last target scanned.
-var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned	
-
-// set after movement/collision
-var COLCNT = 8;//Collision count.
-var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
-
-// communication
-var COMBASE = 10;//Current base of the communications queue
-var COMEND = 11;//Current end-point of the communications queue
-
-}
+function pole_cpu_scan_update(scan_update)
+{
+	// set variables
+	this.memory[ACC]   = scan_update.acc;
+	this.memory[TRID]  = scan_update.trid;
+	this.memory[TRDIR] = scan_update.trdir;
+	this.memory[TRSPD] = scan_update.trspd;
+	this.memory[TRVEL] = scan_update.trvel;
+};
 
 // We also need a function to be called from pole_update to get the config values!
 
@@ -278,7 +264,7 @@ function pole_cpu_config()
 }
 
 // user variables start at 128
-// lets define label as cmd == 255 (63 if we're casting down)
+// lets define label as cmd == MAXCOMMANDS-1 (63 if we're casting down)
 
 // where a cmd can have a number or variable operand
 // add start with numbers and add 64 to replace with variable
