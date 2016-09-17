@@ -48,6 +48,28 @@ var MAXINTERR =20; // max interrupt
 var CONFIG_OPTIONS = 7;
 var CONFIG_POINTS = 12;
 
+var MUTATION_PROB = 0.05;
+
+function asexual_reproduction()
+{
+	var old_program = new Int16Array(this.program);
+	this.program    = new Int16Array(old_program.length);
+	for (i = 0; i < this.program.length; i++)
+	{
+		
+		if ( Math.random() < MUTATION_PROB )
+		{
+			this.program[i] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
+		}
+		else
+		{
+			this.program[i] = old_program[i];
+		}
+		
+	}		
+};
+
+
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
@@ -156,6 +178,10 @@ function pole_cpu(pole) {
 		22     , 1  , 0
 								   ]);
 
+	// asexual reproduction test
+	this.asexual_reproduction()
+								   
+								   
 	// code to create a random program!					   
 	
 	//this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
@@ -261,13 +287,24 @@ function pole_cpu_scan_update(scan_update)
 function pole_cpu_config()
 {
 	return this.config_array;
-}
+};
 
 // user variables start at 128
 // lets define label as cmd == MAXCOMMANDS-1 (63 if we're casting down)
 
 // where a cmd can have a number or variable operand
 // add start with numbers and add 64 to replace with variable
+
+function save_program()
+{
+};
+
+function load_program()
+{
+};
+
+
+
 
 function pole_cpu_update() {
 
@@ -614,10 +651,13 @@ function pole_cpu_update() {
 			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
+				
+				var c = Math.random()*10;
+				
+				if(c < 10) port = 11;
+				
+				
 				//var v = op2;
-				
-				port = 9;
-				
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
@@ -638,11 +678,13 @@ function pole_cpu_update() {
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
 					break;
 					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
-						this.pole.rotate_turret(-10);
+						this.pole.rotate_turret(10);
 					break;
 					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
+						this.pole.aim_turret(0);
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
+						this.pole.steering(10);
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;
@@ -663,7 +705,7 @@ function pole_cpu_update() {
 				// break;	
 				
 			default:
-				//console.log(cmd);
+				console.log(cmd);
 				throw "switch statement fail!";
 		}
 		// increment instruction pointer
@@ -676,7 +718,8 @@ function pole_cpu_update() {
 
 pole_cpu.prototype = {
 	constructor: pole_cpu,
-	pole_cpu_update: pole_cpu_update
+	pole_cpu_update: pole_cpu_update,
+	asexual_reproduction: asexual_reproduction,
 };
 
 // var cpu = new pole_cpu()

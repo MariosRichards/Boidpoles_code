@@ -22,6 +22,43 @@ function poleSwim(x,y,dx,dy,k1,path,count,pole)
     }
 }
 
+function poleRotate(pole)
+{
+	
+	/*this.intended_steering = 0; //In BaseRangeAngle Units
+		this.steering_completed = 0; //In BaseRangeAngle Units
+		this.max_steering_per_tick = 8;*/
+
+	var steering_left = pole.intended_steering - pole.amount_steering_completed;
+
+	if(steering_left != 0)
+	{
+				
+		var radianMax = baseRangeAngleToRadians(pole.max_steering_per_tick);
+					
+		if(steering_left >radianMax)
+		{
+			steering_left = radianMax;
+		} 
+		if(steering_left < -radianMax)
+		{
+			steering_left = -radianMax;
+		}
+						
+		var rotated_vector = rotateVectorByAngle([pole.vx,pole.vy],baseRangeAngleToRadians(steering_left));
+		//console.log("BEF: "+this.vx+"-"+this.vy);
+		
+		pole.vx = rotated_vector[0];
+		pole.vy = rotated_vector[1];
+			
+		pole.steering_completed += steering_left;
+		
+		
+		
+	}
+	
+}
+
 function headTransform(d) {
   return "translate(" + d.path[0] + ")rotate(" + Math.atan2(d.vy, d.vx) * DEGREES + ")";
 }
@@ -58,6 +95,9 @@ function poleMoveUpdate(pole)
 	    // Swim!
 	    poleSwim(x,y,dx,dy,k1,path,count,pole);
 	  
+	  	//Rotation
+	  	
+	  	poleRotate(pole);
 	  	
 	  
 }

@@ -20,6 +20,11 @@ function Pole()
 	
 	this.current_speed = 50;
 	
+	this.intended_steering = 0; //In BaseRangeAngle Units
+	this.amount_steering_completed = 0; //In BaseRangeAngle Units
+	this.max_steering_per_tick = 8;
+	this.is_steering_completed = true;
+	
 	this.throttle = 100;
 	
 	this.maximum_forward_speed = 150;
@@ -337,13 +342,15 @@ function Pole()
 		
 		//console.log(original_turret_heading + "<-->" + properAngleNormalisation(original_turret_heading));
 								
-		var final_amount = original_turret_heading+CPUBaseRangeAngleToBaseRangeAngle(x);
+		//var final_amount = original_turret_heading+CPUBaseRangeAngleToBaseRangeAngle(x);
+		
+		var final_amount = original_turret_heading+x;
 			
 		final_amount = baseRangeAngleToRadians(final_amount);
 				
 		this.turret_heading_offset = radiansToBaseRangeAngleFloat(final_amount);
 		//this.turret_heading = radiansToBaseRangeAngle((properAngleNormalisation(Math.atan2(this.vy, this.vx)))+(this.turret_heading_offset));
-		//[-128,127]
+		//[0,255]
 	};
 	
 	//set curret turret offset to value e.g. move turret to new angle relative to wherever the tank is heading
@@ -355,20 +362,38 @@ function Pole()
 				
 		//var final_amount = radiansToBaseRangeAngle(properAngleNormalisation(original_pole_heading + baseRangeAngleToRadians(CPUBaseRangeAngleToBaseRangeAngle(x))));
 												
-		this.turret_heading_offset = CPUBaseRangeAngleToBaseRangeAngle(x);
+		//this.turret_heading_offset = CPUBaseRangeAngleToBaseRangeAngle(x);
+		this.turret_heading_offset = x;
+		
 		//this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
-		//[-128,127]
+		//[0,255]
 	};
 	
 	//turn tank specified number of degrees
 	this.steering = function(x) {
 		
-		var rotated_vector = rotateVectorByAngle([vx,vy],x*RADIANS);
+		//var rotated_vector = rotateVectorByAngle([this.vx,this.vy],baseRangeAngleToRadians(x));
 		
-		this.vx = rotated_vector[0];
-		this.vy = rotated_vector[1];
+		var original_pole_heading = properAngleNormalisation(Math.atan2(this.vy, this.vx));
 		
-		//[-128,127]
+		var angleDesired = properAngleNormalisation(baseRangeAngleToRadians(x));
+		
+		if(angleDesired > Math.PI)
+		{
+			angleDesired = -angleDesired;
+		}
+				
+		/*this.intended_steering = 0; //In BaseRangeAngle Units
+		this.steering_completed = 0; //In BaseRangeAngle Units
+		this.max_steering_per_tick = 8;*/
+		
+		if(angleDesired != 0)
+		{
+			
+			this.intended_steering = angleDesired;
+			this.amount_steering_completed = 0;
+		}	
+		//[0,255]
 	};
 	
 	//fire weapons at angle of turret with small adjustment [-4,4] adjustment
