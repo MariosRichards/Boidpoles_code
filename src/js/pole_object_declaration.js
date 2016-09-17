@@ -335,13 +335,11 @@ function Pole()
 	{
 		var original_turret_heading = this.turret_heading_offset; 
 				
-		var calc = original_turret_heading += x;
+		var calc = original_turret_heading += CPUBaseRangeAngleToBaseRangeAngle(x);
 				
 		var final_amount = calc;
 			
 		final_amount = baseRangeAngleToRadians(final_amount);
-				
-		console.log(original_turret_heading + "<->" + final_amount);
 				
 		this.turret_heading_offset = radiansToBaseRangeAngleFloat(final_amount);
 		//this.turret_heading = radiansToBaseRangeAngle((properAngleNormalisation(Math.atan2(this.vy, this.vx)))+(this.turret_heading_offset));

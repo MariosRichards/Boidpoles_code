@@ -1,17 +1,13 @@
 
-// 22  128 8  //mov        turn_rate,      8
-// 255 1   0  // :1
-// 27  10  65 // ipo        p_rand, ax
-// 4   65  255// and        ax,     255
-// 156 13  65 // opo        p_abs_turret,     ax 
-// 156 14  128// opo        14,     turn_rate
-// 12  1   0  // jmp        1
+
+var SCREEN_X  = 1000;
+var SCREEN_Y  = 1000;
 
 var MAXINT    = 32767;
 var MININT    = -32768;
 var CPUMEMORY = 1024; // MUST BE POWER OF 2!
 var CPUMEMORYAND = CPUMEMORY - 1; 
-var MAXCOMMANDS = 34; // MUST BE POWER OF 2!
+var MAXCOMMANDS = 35; // Label = Maxcommands -1
 // var MAXCOMMANDSAND = MAXCOMMANDS - 1;
 // define this as the Label command
 var ZEROCYCLESLIMIT = 20;
@@ -22,21 +18,10 @@ var BITLENGTH = 16;
 var RAD2DEG = 128/Math.PI; // turn radians to 'degrees'(0-255)
 
 
-var DSPD = 0;//Desired speed robot is trying to achieve.
-var DHD = 1;//Desired heading robot is trying to achieve.
-var TPOS = 2; // current turret offset
-var ACC = 3; //accuracy value from last scan
+
 var SWAP  = 4;
-var TRID = 5;//ID of last target scanned (by any scan).
-var TRDIR = 6;//Relative heading of last target scanned.
-var TRSPD = 7;//Throttle of last target scanned.
-var COLCNT = 8;//Collision count.
-var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
-var COMBASE = 10;//Current base of the communications queue
-var COMEND = 11;//Current end-point of the communications queue
-// 12?
-var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned
 var FLAGS = 64;
+
 var AX = 65;//ax register
 var BX = 66;//bx register
 var CX = 67;//cx register
@@ -45,17 +30,15 @@ var EX = 69;//ex register
 var FX = 70;//fx register
 var SP = 71;//stack pointer
 
-
-
 // comparison flag bits
 var ZERO_FL = 1<<3;     // Zero flag
 var GRTR_FL = 1<<2;
 var LESS_FL = 1<<1;
-var EQUL_FL = 1;
+var EQUL_FL = 1; // <<0 !
 
 
 
-var LABEL_CMD = 255;
+var LABEL_CMD = MAXCOMMANDS-1;
 
 var MAXIPO = 19; // max input
 var MAXOPO = 13; // max output
@@ -77,7 +60,6 @@ function pole_cpu(pole) {
 									3,  3,  4  ]);
 
 									
-//									Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
 	// code to create a random program!					   
 	randomArray = (length,min,max) => [...new Array(length)]
 		.map((_, i, j) => Math.floor( Math.random() * (max - min + 1) ) + min );
@@ -98,19 +80,85 @@ function pole_cpu(pole) {
 		}
 	}
 
-
-
-	this.program = new Int16Array([18     , 128, 8  ,
-								   255    , 1  , 0  ,
-								   32     , 17 , 65 ,
-								   13     , 65 , 255,
-								   33+128 , 10 , 65 ,
-								   33+128 ,	12 , 128,
-								   22     , 1  , 0 ]);
+	//PEASHOOT.AT2
+	this.program = new Int16Array([
+		18+MAXCOMMANDS,	65,	1,	//  mov     ax,     1 (mov 1 into ax)
+		31,	3,	0,	//int     3  ; Keepshift on.
+		MAXCOMMANDS-1,	0,	0,	//begin 0
+		18+MAXCOMMANDS,	68,	64,	//mov dx,64 ; Set our scan arc to 64 deg
+		MAXCOMMANDS-1,	1,	0,	//start 1
+		33,	8,	100,	     // opo     11,     100     ; Throttle to 100%
+		33+MAXCOMMANDS*2,	0,	68,// opo 17,dx  ; Set arc to DX
+		32+MAXCOMMANDS*2,	14,	70,// ipo 7,fx   ; Scan for enemy
+		21+MAXCOMMANDS,	70,	2000, //  cmp     fx      2000
+		24,	5, 0, // jgr !decide ; No one found? Decide what to do
+		MAXCOMMANDS-1,	2,	0,	// track 2
+				//; Someone was found
+		18+MAXCOMMANDS*3,66,68,//mov bx,dx ; BX = DX (dx is the scan width)
+		15+MAXCOMMANDS*3,66,3,//mpy bx,@3      ; bx = scanwidth*accuracy
+		9+MAXCOMMANDS,66,1,//sar bx,1       ; bx = scanwidth*accuracy/2
+		33+MAXCOMMANDS*2,9,66, //opo 12,bx  ; turn turret by that amount.
+		21+MAXCOMMANDS,68,2,// cmp dx,2     ; check scanwidth
+		28,3,0, //jbe !fire  ; width<=2? then fire, otherwise tighten
+		9+MAXCOMMANDS,68,1,//shr     dx,     1       ; tighten scanwidth
+		MAXCOMMANDS-1,	3,	0,	// !fire 3
+		33+MAXCOMMANDS*2,12,3, // opo     15,     @3      ; Fire!
+		//; Set course towards target
+		18+MAXCOMMANDS*3,66,1, // mov bx,@1 ; get current desired heading
+		//						; (not actual heading)
+		32+MAXCOMMANDS*2,10,64, // ipo 3,ax      ; Get actual heading
+		6+MAXCOMMANDS*2,65,2, // add ax,@2 ;And add to it our turret offset
+		//						; AX is now our new desired heading.
+		21+MAXCOMMANDS,70,120, //cmp fx 120 ; Check our distance
+		27,4,0, 		// jae !turn ; Too close? If not, then steer straight
+		6+MAXCOMMANDS,65,64, //add ax, 64      ; if so, veer off
+		MAXCOMMANDS-1,	4,	0,	// !turn 4
+		6+MAXCOMMANDS,65,255, //and ax, 255     ; Fix ax into 0-255.
+		7+MAXCOMMANDS*3,65,66, // sub ax,bx ;get number of degrees to turn.
+		33+MAXCOMMANDS*2,11,65, //opo     14,     ax      ; turn by ax
+		22,1,0, // jmp     !start          ; start over
+		//;Decides what to do if no one found
+		MAXCOMMANDS-1,	5,	0,	// !decide 5
+		21+MAXCOMMANDS, 68, 64, //cmp dx 64; Compare scanwidth to 64
+		27,6,0, // jae     !flip           ; If above, then flip
+		8+MAXCOMMANDS,68,1, // shl dx 1       ; otherwise, widen arc
+		22,1,0, // jmp     !start          ; start over
+		MAXCOMMANDS-1,	6,	0,	// !flip 6
+		33, 9, 128, // opo 12 128  ; rotate turret 128 degrees (180).
+		33, 11, 8]);   // opo 14 8    ; Turn slightly
+	
+	//STRAIGHT.AT2	
+	this.program = new Int16Array([
+		33,	0,	0,	//out 17, 0 set scan-arc to 0
+		MAXCOMMANDS-1,	0,	0,	//label !loop 0
+		32+MAXCOMMANDS*2,	14,	65,	//in 7, ax  initiate scan, return range to nearest
+		21+MAXCOMMANDS,	65,	1700, //cmp ax, 1700 (compare range to max range)
+		23,	1,	0,	//jls !good  jump to 1
+		33,	9,	1,	//out 12, 1  rotate turret 1 degree clockwise
+		24,	0,	0,	//jgr !loop  jump to 0
+		MAXCOMMANDS-1,	1,	0,	//label !good 1
+		33+MAXCOMMANDS*2,	12,	3,	//out 15, @3 fire gun offset @3 (acc of last scan)
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		26,	0,	0,	//je !loop
+		25,	0,	0,]);	//jne !loop	
+	
+	//SDUCK.AT2
+	this.program = new Int16Array([
+		18     , 128, 8  ,
+		MAXCOMMANDS-1    , 1  , 0  ,
+		32     , 17 , 65 ,
+		13     , 65 , 255,
+		33+MAXCOMMANDS*2 , 10 , 65 ,
+		33+MAXCOMMANDS*2 , 12 , 128,
+		22     , 1  , 0
+								   ]);
 
 	// code to create a random program!					   
 	
-	this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
+	//this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
 	// end code to create a random program!
 	
 	// this.program = new Int16Array([  ]); // jellyhead
@@ -168,39 +216,45 @@ function pole_cpu(pole) {
 	
 }
 
+// set after changing throttle/heading/turret offset
+var DSPD = 0;     //Desired throttle robot is trying to achieve.
+var DHD = 1;      //Desired heading robot is trying to achieve.
+var TPOS = 2;     //Current turret offset
+
+// set after scan
+var ACC = 3;      //accuracy value from last scan
+var TRID = 5;     //ID of last target scanned (by any scan).
+var TRDIR = 6;    //Relative heading of last target scanned.
+var TRSPD = 7;    //Throttle of last target scanned.
+var TRVEL = 13;   //Absolute speed (cm/cycle) of last target scanned	
+
+// set after movement/collision
+var COLCNT = 8;   //Collision count.
+var METERS = 9;   //Meters travelled. 15 bits used.. (32767+1)=0
+
+// communication
+var COMBASE = 10; //Current base of the communications queue
+var COMEND = 11;  //Current end-point of the communications queue
+
 // We need an update function to be called from pole_update to set some memory values!
 
 function pole_cpu_memory_update(hw_set_memory)
 {
 	// set variables
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DHD]  = hw_set_memory.dspd;
-	// this.memory[TPOS] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
-	// this.memory[DSPD] = hw_set_memory.dspd;
+	this.memory[DSPD] = hw_set_memory.dspd;
+	this.memory[DHD]  = hw_set_memory.dhd;
+	this.memory[TPOS] = hw_set_memory.tpos;
+};
 
-// set after changing throttle/heading/turret offset
-var DSPD = 0;//Desired throttle robot is trying to achieve.
-var DHD = 1;//Desired heading robot is trying to achieve.
-var TPOS = 2; // current turret offset
-
-// set after scan
-var ACC = 3; //accuracy value from last scan
-var TRID = 5;//ID of last target scanned (by any scan).
-var TRDIR = 6;//Relative heading of last target scanned.
-var TRSPD = 7;//Throttle of last target scanned.
-var TRVEL = 13;//Absolute speed (cm/cycle) of last target scanned	
-
-// set after movement/collision
-var COLCNT = 8;//Collision count.
-var METERS = 9;//Meters travelled. 15 bits used.. (32767+1)=0
-
-// communication
-var COMBASE = 10;//Current base of the communications queue
-var COMEND = 11;//Current end-point of the communications queue
-
-}
+function pole_cpu_scan_update(scan_update)
+{
+	// set variables
+	this.memory[ACC]   = scan_update.acc;
+	this.memory[TRID]  = scan_update.trid;
+	this.memory[TRDIR] = scan_update.trdir;
+	this.memory[TRSPD] = scan_update.trspd;
+	this.memory[TRVEL] = scan_update.trvel;
+};
 
 // We also need a function to be called from pole_update to get the config values!
 
@@ -210,7 +264,7 @@ function pole_cpu_config()
 }
 
 // user variables start at 128
-// lets define label as cmd == 255 (63 if we're casting down)
+// lets define label as cmd == MAXCOMMANDS-1 (63 if we're casting down)
 
 // where a cmd can have a number or variable operand
 // add start with numbers and add 64 to replace with variable
@@ -261,9 +315,9 @@ function pole_cpu_update() {
 		
 		
 		// HANDLE THE CPU TIME SLICE COST FOR COMMANDS
-		// IPO/OPO/INT - 26,27,28
+		// IPO/OPO/INT - 31,32,33
 		// and DEL - 1 -> DEL N, N (no - just include this as zero - add in the command)
-		if (cmd == 26 || cmd == 27 || cmd == 28) {
+		if (cmd == 31 || cmd == 32 || cmd == 33) {
 			timings_key = 100*cmd + op1;
 		}
 		else {
@@ -285,16 +339,8 @@ function pole_cpu_update() {
 		}
 
 
-		cmd = 33;
-		
-		if(Math.random()*2 >= 1)
-		{
-			port = 12;
-		} else {	
-			port = 9;
-		}
 		// add time cost from cmd_cpu_cycles array!	
-
+		//console.log(cmd)
 		switch(cmd) {
 			case 0: //NOP
 				// no effect other than the time cycle cost of 1
@@ -471,8 +517,8 @@ function pole_cpu_update() {
 					break;
 					case 7://7  32 Find Angle   Returns angle to point specified in EX,FX; AX=result
 					// atan2(values forced into [0-1500]
-						var x = this.memory[EX] % 1000; // originally forced to be positive - I don't see why!
-						var y = this.memory[FX] % 1000;
+						var x = this.memory[EX] % SCREEN_X; // originally forced to be positive - I don't see why!
+						var y = this.memory[FX] % SCREEN_Y;
 						this.memory[AX] = (256+Math.atan2(y,x)*RAD2DEG) % 256 ; // 128, 384
 					break;
 					case 8://8   1 Target-ID    Returns ID of last robot scanned (with any scan) in FX
@@ -568,7 +614,10 @@ function pole_cpu_update() {
 			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
-				var v = op2 & CPUMEMORYAND;
+				//var v = op2;
+				
+				port = 9;
+				
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
@@ -589,28 +638,32 @@ function pole_cpu_update() {
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
 					break;
 					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
-						this.pole.rotate_turret(Math.random());
+						this.pole.rotate_turret(-10);
 					break;
 					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
-						this.pole.attemp_shooting();			
+						var adj = op2%5;
+						this.pole.fire_weapon(adj);		
+						
 					break;
-
 					default:
-						throw "ipo statement fail!";
+						throw "opo statement fail!";
+
 				}		
 				break;
-				
+			case MAXCOMMANDS-1:
+				// // empty
+			break;				
 			// case MAXCOMMANDSAND: // label
 				// // empty
 
 				// break;	
 				
 			default:
-				console.log(cmd);
+				//console.log(cmd);
 				throw "switch statement fail!";
 		}
 		// increment instruction pointer

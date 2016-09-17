@@ -40,5 +40,7 @@ var VISIONCONES_ACTIVE = true;
 var BaseAngleRange = { min: 0, max: 255};
 var RadiansRange = { min: 0, max: 2*Math.PI}; //Important to remember it's not from -Pi to Pi ; Pass every Math.atan through normalisation function
 
+var CPUBaseAngleRange = { min: -127, max: 128};
+
 var ThrottleRange = { min: -75, max: 100};
 var HeatRange = { min: 0, max: 500};

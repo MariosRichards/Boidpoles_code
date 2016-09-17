@@ -94,6 +94,46 @@ function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian
 	return angle;
 }
 
+function CPUBaseRangeAngleToBaseRangeAngle(angle) {
+
+	while(angle < CPUBaseAngleRange.min) angle += CPUBaseAngleRange.max; 
+	while(angle > CPUBaseAngleRange.max) angle -= CPUBaseAngleRange.max; 
+	
+	if(angle < 0)
+	{
+		angle = BaseAngleRange.max + angle + 1;
+	}
+			
+	return angle;
+}
+
+function baseRangeAngleToCPUBaseRangeAngle(angle) {
+
+	if(angle>=BaseAngleRange.min)
+	{
+		while(angle > BaseAngleRange.max)
+		{
+			angle -= BaseAngleRange.max;
+		}
+	}
+	else
+	{
+		while(angle < BaseAngleRange.min)
+		{
+			angle += BaseAngleRange.max;
+		} 
+		
+		//angle = BaseAngleRange.max - angle;
+	}
+	
+	if(angle >= 129)
+	{
+		angle -= 256;
+	}
+	
+	return angle;
+}
+
 function properAngleNormalisation(radan1)
 {
 	var angle_radians = radan1;
