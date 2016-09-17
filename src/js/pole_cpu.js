@@ -48,6 +48,28 @@ var MAXINTERR =20; // max interrupt
 var CONFIG_OPTIONS = 7;
 var CONFIG_POINTS = 12;
 
+var MUTATION_PROB = 1.0;
+
+function asexual_reproduction()
+{
+	var old_program = new Int16Array(this.program);
+	this.program    = new Int16Array(old_program.length);
+	for (i = 0; i < this.program.length; i++)
+	{
+		
+		if ( Math.random() < MUTATION_PROB )
+		{
+			this.program[i] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
+		}
+		else
+		{
+			this.program[i] = old_program[i];
+		}
+		
+	}		
+};
+
+
 // pole_cpu constructor
 function pole_cpu(pole) {
 	
@@ -156,6 +178,10 @@ function pole_cpu(pole) {
 		22     , 1  , 0
 								   ]);
 
+	// asexual reproduction test
+	this.asexual_reproduction()
+								   
+								   
 	// code to create a random program!					   
 	
 	//this.program = new Int16Array( randomArray( Math.floor(Math.random() * 256) , MININT, MAXINT) );
@@ -261,13 +287,24 @@ function pole_cpu_scan_update(scan_update)
 function pole_cpu_config()
 {
 	return this.config_array;
-}
+};
 
 // user variables start at 128
 // lets define label as cmd == MAXCOMMANDS-1 (63 if we're casting down)
 
 // where a cmd can have a number or variable operand
 // add start with numbers and add 64 to replace with variable
+
+function save_program()
+{
+};
+
+function load_program()
+{
+};
+
+
+
 
 function pole_cpu_update() {
 
@@ -340,7 +377,7 @@ function pole_cpu_update() {
 
 
 		// add time cost from cmd_cpu_cycles array!	
-		console.log(cmd)
+		//console.log(cmd)
 		switch(cmd) {
 			case 0: //NOP
 				// no effect other than the time cycle cost of 1
@@ -672,7 +709,8 @@ function pole_cpu_update() {
 
 pole_cpu.prototype = {
 	constructor: pole_cpu,
-	pole_cpu_update: pole_cpu_update
+	pole_cpu_update: pole_cpu_update,
+	asexual_reproduction: asexual_reproduction,
 };
 
 // var cpu = new pole_cpu()
