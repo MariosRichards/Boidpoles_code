@@ -389,8 +389,7 @@ function Pole()
 		
 		if(angleDesired != 0)
 		{
-			
-			this.intended_steering = angleDesired;
+			this.intended_steering += angleDesired;
 			this.amount_steering_completed = 0;
 		}	
 		//[0,255]
