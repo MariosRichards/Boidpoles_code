@@ -45,6 +45,33 @@ function radiansToBaseRangeAngle(angle) //Turns radian angle into the angle in r
 	return angle;
 }
 
+function radiansToBaseRangeAngleFloat(angle) //Turns radian angle into the angle in range 0-255
+{	
+	
+
+	if(angle>=RadiansRange.min)
+	{
+		while(angle > RadiansRange.max)
+		{
+			angle -= RadiansRange.max;
+		}
+		
+	}
+	else
+	{
+		while(angle < RadiansRange.min)
+		{
+			angle += RadiansRange.max;
+		} 
+		
+		angle = RadiansRange.max - angle;
+	}
+	
+	angle = (angle/RadiansRange.max)*BaseAngleRange.max;
+	
+	return angle;
+}
+
 function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian angle
 {		
 	if(angle>=BaseAngleRange.min)
@@ -69,8 +96,20 @@ function baseRangeAngleToRadians(angle) //Turns angle in range 0-255 into radian
 	return angle;
 }
 
+function properAngleNormalisation(radan1)
+{
+	var angle_radians = radan1;
+	
+	/*while (angle_radians < - Math.PI) angle_radians += 2*Math.PI;
+	while (angle_radians > Math.PI) angle_radians -= 2*Math.PI;*/
+	
+	while (angle_radians < 0) angle_radians += 2*Math.PI;
+	while (angle_radians > 2*Math.PI) angle_radians -= 2*Math.PI;
+	
+	return angle_radians;
+}
 //Vector in format [x][y] ; Angle in radians
-var rotateVectorByAngle = function(vec, ang)
+function rotateVectorByAngle(vec, ang)
 {
     var cos = Math.cos(ang);
     var sin = Math.sin(ang);

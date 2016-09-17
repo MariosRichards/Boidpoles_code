@@ -6,13 +6,25 @@ function visionConeTransform(d)
 
 function turretTransform(d)
 {
-	d.turret_heading = radiansToBaseRangeAngle((Math.atan2(d.vy, d.vx))+(baseRangeAngleToRadians(d.turret_heading_offset)));
+	/*d.turret_heading = radiansToBaseRangeAngle( 
+		properAngleNormalisation( 
+			( Math.atan2(d.vy, d.vx))-(baseRangeAngleToRadians(d.turret_heading_offset) )
+			)
+	);
 	
-	//return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading))+90) + ")";
+	return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading) * DEGREES)+90) + ")";*/
 	
-	//d.turret_heading = radiansToBaseRangeAngle(Math.PI);
+	d.turret_heading = radiansToBaseRangeAngleFloat( 
+		properAngleNormalisation( 
+			(properAngleNormalisation(Math.atan2(d.vy, d.vx)))-(baseRangeAngleToRadians(d.turret_heading_offset) )
+			)
+	);
+	
+	//console.log( properAngleNormalisation(Math.atan2(d.vy, d.vx)) +"<-->"+ baseRangeAngleToRadians(d.turret_heading));
 	
 	return "translate(" + d.path[0] + ")rotate(" + ((baseRangeAngleToRadians(d.turret_heading) * DEGREES)+90) + ")";
+	
+	
 }
 
 function visionConeUpdate(pole) {
@@ -54,18 +66,17 @@ function visionConeUpdate(pole) {
 				  
 				    //console.log(pole.turret_heading);
 			        //var angle_radians = Math.atan2(dy, dx) - Math.atan2(pole.vy, pole.vx);
-			        var angle_radians = Math.atan2(dy, dx) - baseRangeAngleToRadians(pole.turret_heading);
-			        			        
-			        while (angle_radians < - Math.PI) angle_radians += 2*Math.PI;
-			        while (angle_radians > Math.PI) angle_radians -= 2*Math.PI;
-			       
+			        
+			        var angle_radians = properAngleNormalisation(properAngleNormalisation(Math.atan2(dy, dx))-baseRangeAngleToRadians(pole.turret_heading));
+			        			       
 					//angle_radians = Math.abs(angle_radians);
 			
 					//angle_radians = Math.PI - (Math.abs(Math.PI - angle_radians)%(2*Math.PI));
 					 
 					//if (angle_radians < 0) angle_radians += 2 * Math.PI;
-												
-					if(angle_radians < half_angle && angle_radians > - half_angle)
+						
+					//if(angle_radians < half_angle && angle_radians > - half_angle)						
+					if(angle_radians < half_angle || (angle_radians > 2*Math.PI - half_angle))
 					{
 						//console.log(angle_radians);
 						d3.select("#pole_vision_cone"+pole.key).attr("fill","green");	
