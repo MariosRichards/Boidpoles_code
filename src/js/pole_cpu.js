@@ -48,7 +48,7 @@ var MAXINTERR =20; // max interrupt
 var CONFIG_OPTIONS = 7;
 var CONFIG_POINTS = 12;
 
-var MUTATION_PROB = 1.0;
+var MUTATION_PROB = 0.05;
 
 function asexual_reproduction()
 {
