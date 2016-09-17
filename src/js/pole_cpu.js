@@ -7,6 +7,9 @@
 // 156 14  128// opo        14,     turn_rate
 // 12  1   0  // jmp        1
 
+var SCREEN_X  = 1000;
+var SCREEN_Y  = 1000;
+
 var MAXINT    = 32767;
 var MININT    = -32768;
 var CPUMEMORY = 1024; // MUST BE POWER OF 2!
@@ -97,15 +100,81 @@ function pole_cpu(pole) {
 		}
 	}
 
-
-
-	this.program = new Int16Array([18     , 128, 8  ,
-								   MAXCOMMANDS-1    , 1  , 0  ,
-								   32     , 17 , 65 ,
-								   13     , 65 , 255,
-								   33+MAXCOMMANDS*2 , 10 , 65 ,
-								   33+MAXCOMMANDS*2 , 12 , 128,
-								   22     , 1  , 0 ]);
+	//PEASHOOT.AT2
+	this.program = new Int16Array([
+		18+MAXCOMMANDS,	65,	1,	//  mov     ax,     1 (mov 1 into ax)
+		31,	3,	0,	//int     3  ; Keepshift on.
+		MAXCOMMANDS-1,	0,	0,	//begin 0
+		18+MAXCOMMANDS,	68,	64,	//mov dx,64 ; Set our scan arc to 64 deg
+		MAXCOMMANDS-1,	1,	0,	//start 1
+		33,	8,	100,	     // opo     11,     100     ; Throttle to 100%
+		33+MAXCOMMANDS*2,	0,	68,// opo 17,dx  ; Set arc to DX
+		32+MAXCOMMANDS*2,	14,	70,// ipo 7,fx   ; Scan for enemy
+		21+MAXCOMMANDS,	70,	2000, //  cmp     fx      2000
+		24,	5, 0, // jgr !decide ; No one found? Decide what to do
+		MAXCOMMANDS-1,	2,	0,	// track 2
+				//; Someone was found
+		18+MAXCOMMANDS*3,66,68,//mov bx,dx ; BX = DX (dx is the scan width)
+		15+MAXCOMMANDS*3,66,3,//mpy bx,@3      ; bx = scanwidth*accuracy
+		9+MAXCOMMANDS,66,1,//sar bx,1       ; bx = scanwidth*accuracy/2
+		33+MAXCOMMANDS*2,9,66, //opo 12,bx  ; turn turret by that amount.
+		21+MAXCOMMANDS,68,2,// cmp dx,2     ; check scanwidth
+		28,3,0, //jbe !fire  ; width<=2? then fire, otherwise tighten
+		9+MAXCOMMANDS,68,1,//shr     dx,     1       ; tighten scanwidth
+		MAXCOMMANDS-1,	3,	0,	// !fire 3
+		33+MAXCOMMANDS*2,12,3, // opo     15,     @3      ; Fire!
+		//; Set course towards target
+		18+MAXCOMMANDS*3,66,1, // mov bx,@1 ; get current desired heading
+		//						; (not actual heading)
+		32+MAXCOMMANDS*2,10,64, // ipo 3,ax      ; Get actual heading
+		6+MAXCOMMANDS*2,65,2, // add ax,@2 ;And add to it our turret offset
+		//						; AX is now our new desired heading.
+		21+MAXCOMMANDS,70,120, //cmp fx 120 ; Check our distance
+		27,4,0, 		// jae !turn ; Too close? If not, then steer straight
+		6+MAXCOMMANDS,65,64, //add ax, 64      ; if so, veer off
+		MAXCOMMANDS-1,	4,	0,	// !turn 4
+		6+MAXCOMMANDS,65,255, //and ax, 255     ; Fix ax into 0-255.
+		7+MAXCOMMANDS*3,65,66, // sub ax,bx ;get number of degrees to turn.
+		33+MAXCOMMANDS*2,11,65, //opo     14,     ax      ; turn by ax
+		22,1,0, // jmp     !start          ; start over
+		//;Decides what to do if no one found
+		MAXCOMMANDS-1,	5,	0,	// !decide 5
+		21+MAXCOMMANDS, 68, 64, //cmp dx 64; Compare scanwidth to 64
+		27,6,0, // jae     !flip           ; If above, then flip
+		8+MAXCOMMANDS,68,1, // shl dx 1       ; otherwise, widen arc
+		22,1,0, // jmp     !start          ; start over
+		MAXCOMMANDS-1,	6,	0,	// !flip 6
+		33, 9, 128, // opo 12 128  ; rotate turret 128 degrees (180).
+		33, 11, 8]);   // opo 14 8    ; Turn slightly
+	
+	//STRAIGHT.AT2	
+	this.program = new Int16Array([
+		33,	0,	0,	//out 17, 0 set scan-arc to 0
+		MAXCOMMANDS-1,	0,	0,	//label !loop 0
+		32+MAXCOMMANDS*2,	14,	65,	//in 7, ax  initiate scan, return range to nearest
+		21+MAXCOMMANDS,	65,	1700, //cmp ax, 1700 (compare range to max range)
+		23,	1,	0,	//jls !good  jump to 1
+		33,	9,	1,	//out 12, 1  rotate turret 1 degree clockwise
+		24,	0,	0,	//jgr !loop  jump to 0
+		MAXCOMMANDS-1,	1,	0,	//label !good 1
+		33+MAXCOMMANDS*2,	12,	3,	//out 15, @3 fire gun offset @3 (acc of last scan)
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		33+MAXCOMMANDS*2,	12,	3,
+		26,	0,	0,	//je !loop
+		25,	0,	0,]);	//jne !loop	
+	
+	//SDUCK.AT2
+	this.program = new Int16Array([
+		18     , 128, 8  ,
+		MAXCOMMANDS-1    , 1  , 0  ,
+		32     , 17 , 65 ,
+		13     , 65 , 255,
+		33+MAXCOMMANDS*2 , 10 , 65 ,
+		33+MAXCOMMANDS*2 , 12 , 128,
+		22     , 1  , 0
+								   ]);
 
 	// code to create a random program!					   
 	
@@ -462,8 +531,8 @@ function pole_cpu_update() {
 					break;
 					case 7://7  32 Find Angle   Returns angle to point specified in EX,FX; AX=result
 					// atan2(values forced into [0-1500]
-						var x = this.memory[EX] % 1000; // originally forced to be positive - I don't see why!
-						var y = this.memory[FX] % 1000;
+						var x = this.memory[EX] % SCREEN_X; // originally forced to be positive - I don't see why!
+						var y = this.memory[FX] % SCREEN_Y;
 						this.memory[AX] = (256+Math.atan2(y,x)*RAD2DEG) % 256 ; // 128, 384
 					break;
 					case 8://8   1 Target-ID    Returns ID of last robot scanned (with any scan) in FX
@@ -559,7 +628,7 @@ function pole_cpu_update() {
 			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
-				var v = op2 & CPUMEMORYAND;
+				//var v = op2;
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
@@ -586,11 +655,12 @@ function pole_cpu_update() {
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
-						poleShootUpdate(this.pole);		
+						var adj = op2%5;
+						this.pole.fire_weapon(adj);		
 						
 					break;
 					default:
-						throw "ipo statement fail!";
+						throw "opo statement fail!";
 
 				}		
 				break;
