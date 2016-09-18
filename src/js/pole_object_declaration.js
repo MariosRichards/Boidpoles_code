@@ -380,7 +380,7 @@ function Pole()
 		
 		if(angleDesired > Math.PI)
 		{
-			angleDesired = -angleDesired;
+			angleDesired = -(2*Math.PI - angleDesired);
 		}
 				
 		/*this.intended_steering = 0; //In BaseRangeAngle Units
