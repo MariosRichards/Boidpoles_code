@@ -1,5 +1,7 @@
 function poleDetectCollision(x,y,pole){
 	
+	var is_colliding_pole = false;
+	
 	pole.collision_cooldown -= 1;
 	
 	if(pole.collision_cooldown < 0)
@@ -21,8 +23,10 @@ function poleDetectCollision(x,y,pole){
 				
 				if (distance < circle1.radius + circle2.radius) {
 	
-				    pole.vx *= -1;
-		    		pole.vy *= -1;
+					is_colliding_pole = true;
+					
+				    /*pole.vx *= -1;
+		    		pole.vy *= -1;*/
 		    		
 		    		pole.collision_cooldown = POLE_COLLISION_COOLDOWN;
 		    		
@@ -38,7 +42,15 @@ function poleDetectCollision(x,y,pole){
 		}
 	}
 	
+	pole.is_colliding_pole = is_colliding_pole;
+		
+	var is_colliding_wall = false;
 	
+	if (x < 0 || x > CANVAS_WIDTH) { is_colliding_wall = true; }
+    if (y < 0 || y > CANVAS_HEIGHT) { is_colliding_wall = true; }
+    
+    pole.is_colliding_wall = is_colliding_wall;
+    
 	
 	
 }

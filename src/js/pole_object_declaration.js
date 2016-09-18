@@ -5,6 +5,42 @@ function Pole()
 	
 	var x = Math.random() * CANVAS_WIDTH,
 		y = Math.random() * CANVAS_HEIGHT;
+		
+	var free_space = false;
+	
+	var attempts = 10000;
+	
+	//Loop controls that poles only appear in free space, and not on top of other poles
+	while(!free_space && attempts > 0)
+	{
+		var collided = false;
+	
+		for(var i=0;i<spermatozoa.length;i++)
+		{						
+			var circle1 = {radius: POLE_COLLISION_RADIUS, x: x, y: y};
+			var circle2 = {radius: POLE_COLLISION_RADIUS, x: spermatozoa[i].path[0][0], y: spermatozoa[i].path[0][1]};
+			
+			var dx = circle1.x - circle2.x;
+			var dy = circle1.y - circle2.y;
+			
+			var distance = Math.sqrt(dx * dx + dy * dy);
+			
+			//Collided
+			if (distance < circle1.radius + circle2.radius) {
+				collided = true;
+				break;
+			}				
+		}
+		
+		if(collided)
+		{
+			x = Math.random() * CANVAS_WIDTH,
+			y = Math.random() * CANVAS_HEIGHT;
+		
+		} else free_space = true;
+			
+		attempts--;
+	}
 	
 	var shooting_cooldown = Math.floor(Math.random() * ((POLE_SHOOTING_COOLDOWN_BASE+SHOOTING_COOLDOWN_MAX_VARIANCE) - (POLE_SHOOTING_COOLDOWN_BASE-SHOOTING_COOLDOWN_MAX_VARIANCE)) + (POLE_SHOOTING_COOLDOWN_BASE-SHOOTING_COOLDOWN_MAX_VARIANCE));
 		
@@ -24,6 +60,9 @@ function Pole()
 	this.amount_steering_completed = 0; //In BaseRangeAngle Units
 	this.max_steering_per_tick = 8;
 	this.is_steering_completed = true;
+	
+	this.is_colliding_wall = false;
+	this.is_colliding_pole = false;
 	
 	this.throttle = 100;
 	
