@@ -376,21 +376,26 @@ function Pole()
 		
 		var original_pole_heading = properAngleNormalisation(Math.atan2(this.vy, this.vx));
 		
-		var angleDesired = properAngleNormalisation(baseRangeAngleToRadians(x));
+		var angle_desired = properAngleNormalisation(baseRangeAngleToRadians(x));
 		
-		if(angleDesired > Math.PI)
+		var final_intended_steering = this.intended_steering + angle_desired;
+		
+		if(final_intended_steering > Math.PI)
 		{
-			angleDesired = -(2*Math.PI - angleDesired);
+			final_intended_steering = -(2*Math.PI - angle_desired);
 		}
 				
 		/*this.intended_steering = 0; //In BaseRangeAngle Units
 		this.steering_completed = 0; //In BaseRangeAngle Units
 		this.max_steering_per_tick = 8;*/
 		
-		if(angleDesired != 0)
+		if(angle_desired != 0)
 		{
-			this.intended_steering += angleDesired;
-			this.amount_steering_completed = 0;
+			if(this.intended_steering == this.amount_steering_completed)
+			{
+				this.amount_steering_completed = 0;
+			}
+			this.intended_steering = final_intended_steering;
 		}	
 		//[0,255]
 	};
