@@ -3,8 +3,8 @@ function Pole()
 
 	UNIQUE_KEY += 1;
 	
-	var x = Math.random() * CANVAS_WIDTH,
-		y = Math.random() * CANVAS_HEIGHT;
+	var x = Math.random() * (CANVAS_WIDTH - POLE_COLLISION_RADIUS*2),
+		y = Math.random() * (CANVAS_HEIGHT - POLE_COLLISION_RADIUS*2);
 		
 	var free_space = false;
 	
@@ -17,8 +17,8 @@ function Pole()
 	
 		for(var i=0;i<spermatozoa.length;i++)
 		{						
-			var circle1 = {radius: POLE_COLLISION_RADIUS, x: x, y: y};
-			var circle2 = {radius: POLE_COLLISION_RADIUS, x: spermatozoa[i].path[0][0], y: spermatozoa[i].path[0][1]};
+			var circle1 = {radius: POLE_COLLISION_RADIUS*2, x: x, y: y};
+			var circle2 = {radius: POLE_COLLISION_RADIUS*2, x: spermatozoa[i].path[0][0], y: spermatozoa[i].path[0][1]};
 			
 			var dx = circle1.x - circle2.x;
 			var dy = circle1.y - circle2.y;
@@ -34,11 +34,14 @@ function Pole()
 		
 		if(collided)
 		{
-			x = Math.random() * CANVAS_WIDTH,
-			y = Math.random() * CANVAS_HEIGHT;
+			x = Math.random() * (CANVAS_WIDTH - POLE_COLLISION_RADIUS*2),
+			y = Math.random() * (CANVAS_HEIGHT - POLE_COLLISION_RADIUS*2);
 		
-		} else free_space = true;
-			
+		} else {
+			free_space = true;
+			attempts = 10000;
+		}
+		
 		attempts--;
 	}
 	
