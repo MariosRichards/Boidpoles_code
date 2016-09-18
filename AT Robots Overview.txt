@@ -1,0 +1,155 @@
+AT ROBOTS
+
+Options:
+	Scan arcs visible/not visible
+	Sound effects on/off
+	Graphics on/off
+	Timing on/off (fixed timing? I.e. slow down if it's running too fast?)
+	Debug (for robots #1)
+	
+Game report:
+	
+2
+0 1 SNIPER 
+1 1 RANDMAN3
+
+/R :  Wins Trials Name
+/R2:  Wins Trials Kills Deaths Name
+/R3:  Wins Trials Kills Deaths EndingArmor EndingHeat ShotsFired Name
+/R4:  Wins Trials Kills Deaths EndingArmor EndingHeat ShotsFired Hits DamageTotal CyclesLived ErrorCount Name
+
+
+General Info
+
+Arena 1000,1000
+(0,0) is upper left corner, (1000,1000) is lower-right
+
+Angles represent as 256 degree circle
+- 0/256 is North, 64 is East, 128 is South, 192 is West
+
+Robot have
+- size (radius =4)
+- armour (hitpoints) 100 hitpoints
+- scanner
+- weapon
+	shots deal damage based on accuracy to everyone within range
+	(i.e. point blank shot can damage yourself)
+- overburn status (generates more heat, shots move faster, robot moves faster)
+- turning/accelerating robot takes time
+- turret moves instantly
+
+Damage
+- collisions	1
+- various levels of heat deal 1pt from 1/64 cycles to 1/4 cycles ... then explode robot
+- missile blast 14-distance
+- robot detonation 25-distance
+- mine blast 35-distance
+(overburn missile blast damage + 25%, overburn robot detonate damage +30%)
+
+
+  Robot performance:              per game cycle:
+   ~~~~~~~~~~~~~~~~~~              ~~~~~~~~~~~~~~~
+   Robot radius                      4 meters
+   Normal missile velocity:         32 meters
+   Maximum non-overburn speed:       4 meters
+   Turn rate:                        8 degrees
+   Acceleration                      4% of max forward speed
+   Turret rotation                  Instantaneous
+
+Heat effects
+============
+
+     80+   Max speed reduced to 98%
+    100+   Max speed reduced to 95%.
+    150+   Max speed reduced to 85%.
+    200+   Max speed reduced to 70%.
+    250+   Max speed reduced to 50%.
+    300+   Heat starts burning armor off (the hotter, the faster)
+    400+   Robot stops executing commands until cools below 350 (shutdown -> speed 0)
+    500+   Robot explodes.
+(robots can change their shutdown temperature from the default!)
+
+Normal heat exchanges:  (can be altered with robot configs)
+======================
+    Firing weapon:                 20
+    Dissipation per game cycle:     1   ( +1/8 if throttle is -25% to 25% )
+
+Overburn effects
+================
+             1) faster driving speed                          (130%)
+             2) weapon does more damage                       (125%)
+             3) weapon projectiles move faster                (125%)
+             4) weapon generates more heat                    (150%)
+             5) nastier explosion from death or self-destruct (130%)
+             6) worse heat dissipation                        ( 66%)
+(note: these effect your base speed - i.e. you're still running at 100% throttle, it's just the base speed is 30% higher)	
+	
+Robot Configuration
+===================
+
+Points   Scanner  Weapon    Armor    Engine  Heatsinks  Mines  Shield
+------   -------  ------  ---------  ------  ---------  -----  ------
+   0       250     0.50   0.50,1.33   0.50     0.75       2*    None*
+   1       350     0.80   0.66,1.20   0.80     1.00*      4       -
+   2       500     1.00*  1.00,1.00*  1.00*    1.125      6       -
+   3       700     1.20   1.20,0.85   1.20     1.25      10     Weak
+   4      1000     1.35   1.30,0.75   1.35     1.33      16     Medium
+   5      1500*    1.50   1.50,0.66   1.50     1.50      24     Strong
+
+Scanner:   This is the maximum range your scanner can see.
+Weapon:    A multiplier placed upon your missiles damage, speed, and heat.
+Armor:     Two multipliers:   1. Armor multiplier   2. Speed multiplier
+Engine:    This is the multiplier applied to your maximum speed.
+Heatsinks: Change in heat dissipation (multiplier).
+Mines:     This is the number of mines you start the battle with.
+Shield:    It takes at least 3 points to get one. Blocks damage
+
+  Shield damage blocking:
+
+  Weak:    2/3 damage gets through, and 2/3 converted to heat. (1/3 overlap)
+  Medium:  1/2 damage gets through, other half turned to heat.
+  Strong:  1/3 damage gets through, and 1/3 converted to heat.
+
+
+Hardware Robot Game Cycle
+=========================
+
+
+(1)   Run CPU (cpu may trigger hardware actions like firing weapon which have hardware sideeffects)
+(2)   Check Heat - apply effects (e.g. damage/explode)
+(3)   Check Hit Points (e.g. is it now dead? If so, explode)
+(4)   Move
+        - Check for collisions
+		- Update damage, check for death
+		
+<end turn>
+  
+
+
+
+Shot/Mine Cycle
+===============
+
+(1) Check if shot detonates (on robot or wall)
+(2) Calculate damage (modified by distance/robot armour config/shield)
+    - Requires going through all robots and checking distance
+	- Did it kill it?
+
+
+(Robots can detonate, mines can detonate, similar cycle but triggered by robot cycle)
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
