@@ -185,7 +185,7 @@ function pole_cpu(pole) {
 		32     , 17 , 65 , // random number to mem65
 		13     , 65 , 255, // and mem65 with 255 [0-255]
 		33+MAXCOMMANDS*2 , 10 , 65 ,
-		33+MAXCOMMANDS*2 , 12 , 128,
+		33+MAXCOMMANDS*2 , 8 , 100,
 		22     , 1  , 0
 								   ]);								   
 								   
@@ -683,16 +683,18 @@ function pole_cpu_update() {
 					case 7: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 					break;						
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
+						this.pole.set_throttle( Math.abs( op2 % 100 ) );
 					break;
 					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative) [0-255]
 						this.pole.rotate_turret( Math.abs( op2 % 256 ) );
 					break;
 					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
 						this.pole.aim_turret( Math.abs( op2 % 256 ) );
-						console.log(Math.abs( op2 % 256 ));
+						//console.log(Math.abs( op2 % 256 ));
 						
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
+						this.pole.steering( Math.abs( op2 % 256 ) );
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;

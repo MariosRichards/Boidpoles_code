@@ -102,9 +102,7 @@ function Pole()
 	this.turret_heading = radiansToBaseRangeAngle(0);
 	
 	this.armour = 100;
-	
-	this.desired_speed = 0;
-	
+		
 	
 	this.attemp_shooting = function() {
 		
