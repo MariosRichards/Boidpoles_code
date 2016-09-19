@@ -90,7 +90,7 @@ function Pole()
 	this.desired_throttle = Math.random() * (ThrottleRange.max - ThrottleRange.min) + ThrottleRange.min;
 	
 	this.throttle = 10; //range [-75, 100]
-	this.desired_throttle = 10;
+	this.desired_throttle = 0;
 			
 	this.current_speed = this.throttle/ThrottleRange.max*POLE_MAX_NONOVERBURN_SPEED;
 		

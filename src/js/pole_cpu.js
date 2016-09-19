@@ -182,7 +182,7 @@ function pole_cpu(pole) {
 	this.program = new Int16Array([
 		18     , 128, 2  , // mov 8 to mem128
 		MAXCOMMANDS-1    , 1  , 0  , // label 1
-		32     , 17 , 65 , // random number to mem65
+		32     , 14 , 65 , // random number to mem65
 		13     , 65 , 255, // and mem65 with 255 [0-255]
 		33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
 		33+MAXCOMMANDS*2 , 10 , 129, // aim turret straight ahead
@@ -644,6 +644,14 @@ function pole_cpu_update() {
 					case 13:  // 6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
 					break;
 					case 14:  // 7   1    I  Scanner           Returns range to nearest target in scan arc
+						
+						var rand = Math.random()*500;
+						
+						if(rand < 0.3)
+						{
+							this.pole.scanner();
+						}
+						
 					break;
 					case 15:  // 8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
 					break;
@@ -700,7 +708,7 @@ function pole_cpu_update() {
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
 						this.pole.steering( Math.abs( op2 % 256 ) );
-						console.log(op2);
+						//console.log(op2);
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;

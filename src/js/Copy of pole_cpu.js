@@ -48,7 +48,7 @@ var MAXINTERR =20; // max interrupt
 var CONFIG_OPTIONS = 7;
 var CONFIG_POINTS = 12;
 
-var MUTATION_PROB = 0.05;
+var MUTATION_PROB = 0.00;
 
 function asexual_reproduction()
 {
@@ -167,7 +167,7 @@ function pole_cpu(pole) {
 		26,	0,	0,	//je !loop
 		25,	0,	0,]);	//jne !loop	
 	
-	//SDUCK.AT2
+	//SDUCK.AT2 (modified to shoot)
 	this.program = new Int16Array([
 		18     , 128, 8  ,
 		MAXCOMMANDS-1    , 1  , 0  ,
@@ -178,6 +178,18 @@ function pole_cpu(pole) {
 		22     , 1  , 0
 								   ]);
 
+	//SDUCK.AT2 (modified to shoot)
+	this.program = new Int16Array([
+		18     , 128, 2  , // mov 8 to mem128
+		MAXCOMMANDS-1    , 1  , 0  , // label 1
+		32     , 14 , 65 , // random number to mem65
+		13     , 65 , 255, // and mem65 with 255 [0-255]
+		33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
+		33+MAXCOMMANDS*2 , 10 , 129, // aim turret straight ahead
+		22     , 1  , 0 // jump to label 1
+								   ]);								   
+								   
+								   
 	// asexual reproduction test
 	this.asexual_reproduction()
 								   
@@ -601,7 +613,7 @@ function pole_cpu_update() {
 			case 32: // IPO N V// NOTE - V is fixed - would change order, but better to remain ATRobots compatible
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXIPO); // still some output only options in here!
-				var v = op1 & CPUMEMORYAND;
+				var v = op2 & CPUMEMORYAND;
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
 					break;
@@ -632,6 +644,14 @@ function pole_cpu_update() {
 					case 13:  // 6   0    I  Damage Sensor     Returns current armor level      [0 - 100]
 					break;
 					case 14:  // 7   1    I  Scanner           Returns range to nearest target in scan arc
+						
+						var rand = Math.random()*500;
+						
+						if(rand < 0.3)
+						{
+							this.pole.scanner();
+						}
+						
 					break;
 					case 15:  // 8   1    I  Accuracy          Returns accuracy of last scan     [-2 - 2]
 					break;
@@ -639,6 +659,7 @@ function pole_cpu_update() {
 					break;
 					case 17: // 10   0    I  Random Generator  Returns random number     [-32768 - 32767]
 						this.memory[v] = Math.floor( Math.random() * (MAXINT - MININT + 1) ) + MININT;
+						
 					break;
 					case 18: // 16  40    I  Sonar             Returns heading to nearest target[0 - 255]
 					break;
@@ -651,12 +672,6 @@ function pole_cpu_update() {
 			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
-				
-				var c = Math.random()*10;
-				
-				if(c < 10) port = 11;
-				
-				
 				//var v = op2;
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]
@@ -676,15 +691,24 @@ function pole_cpu_update() {
 					case 7: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 					break;						
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
+						//
+						var des_thr = op2;
+						if (des_thr<0) {des_thr = des_thr % 76;}
+						else {des_thr = des_thr % 101;}
+						this.pole.set_throttle( des_thr );
+
 					break;
-					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
-						this.pole.rotate_turret(0);
+					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative) [0-255]
+						this.pole.rotate_turret( Math.abs( op2 % 256 ) );
 					break;
 					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
-						this.pole.aim_turret(0);
+						this.pole.aim_turret( Math.abs( op2 % 256 ) );
+						//console.log(Math.abs( op2 % 256 ));
+						
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
-						this.pole.steering(10);
+						this.pole.steering( Math.abs( op2 % 256 ) );
+						//console.log(op2);
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;

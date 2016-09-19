@@ -47,9 +47,7 @@ function poleRotate(pole)
 			
 
 		var rotated_vector = rotateVectorByAngle([pole.vx,pole.vy],steering_left);
-		//console.log("BEF: "+this.vx+"-"+this.vy);
-		
-		
+				
 		pole.vx = rotated_vector[0];
 		pole.vy = rotated_vector[1];
 				
@@ -103,7 +101,7 @@ function poleMoveUpdate(pole)
 		pole.throttle = throttle;
 		
 		pole.current_speed = pole.throttle/ThrottleRange.max*POLE_MAX_NONOVERBURN_SPEED;
-					
+							
 	    var path = pole.path,
 	        x = path[0][0] + pole.vx * pole.current_speed,
 	        y = path[0][1] + pole.vy * pole.current_speed;
@@ -124,7 +122,6 @@ function poleMoveUpdate(pole)
 			
 	    // Bounce off the walls.
 	    //bounceWalls(x,y,pole);
-	
 	
 	
 		var dx,
