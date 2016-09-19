@@ -32,9 +32,9 @@ function poleRotate(pole)
 	var steering_left = pole.intended_steering - pole.amount_steering_completed;
 
 	if(steering_left != 0)
-	{
-				
-		var radianMax = baseRangeAngleToRadians(pole.max_steering_per_tick);
+	{	
+		var radianMax = baseRangeAngleToRadians(POLE_MAX_STEERING_PER_TICK);
+		
 					
 		if(steering_left >radianMax)
 		{
@@ -44,17 +44,26 @@ function poleRotate(pole)
 		{
 			steering_left = -radianMax;
 		}
-						
-		var rotated_vector = rotateVectorByAngle([pole.vx,pole.vy],baseRangeAngleToRadians(steering_left));
+			
+
+		var rotated_vector = rotateVectorByAngle([pole.vx,pole.vy],steering_left);
 		//console.log("BEF: "+this.vx+"-"+this.vy);
+		
 		
 		pole.vx = rotated_vector[0];
 		pole.vy = rotated_vector[1];
-			
-		pole.steering_completed += steering_left;
+				
+		pole.amount_steering_completed += steering_left;
 		
 		
+	}
 		
+	steering_left = pole.intended_steering - pole.amount_steering_completed;
+	
+	if(steering_left == 0)
+	{		
+		pole.intended_steering = 0;
+		pole.amount_steering_completed = 0;
 	}
 	
 }

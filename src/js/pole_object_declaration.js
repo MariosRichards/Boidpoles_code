@@ -81,7 +81,6 @@ function Pole()
 		
 	this.intended_steering = 0; //In BaseRangeAngle Units
 	this.amount_steering_completed = 0; //In BaseRangeAngle Units
-	this.max_steering_per_tick = 8;
 	this.is_steering_completed = true;
 	
 	this.is_colliding_wall = false;
@@ -89,6 +88,9 @@ function Pole()
 	
 	this.throttle = Math.random() * (ThrottleRange.max - ThrottleRange.min) + ThrottleRange.min; //range [-75, 100]
 	this.desired_throttle = Math.random() * (ThrottleRange.max - ThrottleRange.min) + ThrottleRange.min;
+	
+	this.throttle = 10; //range [-75, 100]
+	this.desired_throttle = 10;
 			
 	this.current_speed = this.throttle/ThrottleRange.max*POLE_MAX_NONOVERBURN_SPEED;
 		
@@ -443,6 +445,8 @@ function Pole()
 		
 		var final_intended_steering = this.intended_steering + angle_desired;
 		
+		//console.log(this.intended_steering - this.amount_steering_completed);
+		
 		if(final_intended_steering > Math.PI)
 		{
 			final_intended_steering = -(2*Math.PI - angle_desired);
@@ -454,11 +458,15 @@ function Pole()
 		
 		if(angle_desired != 0)
 		{
-			if(this.intended_steering == this.amount_steering_completed)
+			/*if(this.intended_steering == this.amount_steering_completed)
 			{
+				console.log("TITITI");
+				this.intended_steering = 0;
 				this.amount_steering_completed = 0;
-			}
+			}*/
+			
 			this.intended_steering = final_intended_steering;
+			
 		}	
 		//[0,255]
 	};
