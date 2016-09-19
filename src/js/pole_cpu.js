@@ -180,13 +180,13 @@ function pole_cpu(pole) {
 
 	//SDUCK.AT2 (modified to shoot)
 	this.program = new Int16Array([
-		18     , 128, 8  ,
-		MAXCOMMANDS-1    , 1  , 0  ,
+		18     , 128, 2  , // mov 8 to mem128
+		MAXCOMMANDS-1    , 1  , 0  , // label 1
 		32     , 17 , 65 , // random number to mem65
 		13     , 65 , 255, // and mem65 with 255 [0-255]
-		33+MAXCOMMANDS*2 , 10 , 65 ,
-		33+MAXCOMMANDS*2 , 8 , 100,
-		22     , 1  , 0
+		33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
+		33+MAXCOMMANDS*2 , 10 , 129, // aim turret straight ahead
+		22     , 1  , 0 // jump to label 1
 								   ]);								   
 								   
 								   
@@ -683,7 +683,12 @@ function pole_cpu_update() {
 					case 7: // 24   0   I/O Shield            Sets/Returns shield's status (0=off, else=on)
 					break;						
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
-						this.pole.set_throttle( Math.abs( op2 % 100 ) );
+						//
+						var des_thr = op2;
+						if (des_thr<0) {des_thr = des_thr % 76;}
+						else {des_thr = des_thr % 101;}
+						this.pole.set_throttle( des_thr );
+
 					break;
 					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative) [0-255]
 						this.pole.rotate_turret( Math.abs( op2 % 256 ) );
@@ -695,6 +700,7 @@ function pole_cpu_update() {
 					break;
 					case 11: // 14   0    O  Steering          Turn specified number of degrees
 						this.pole.steering( Math.abs( op2 % 256 ) );
+						console.log(op2);
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;
