@@ -74,13 +74,32 @@ function tailPath(d) {
 
 function poleMoveUpdate(pole)
 {
-			
-	    var path = pole.path,
-	        x = path[0][0] + pole.vx,
-	        y = path[0][1] + pole.vy;
-	
-	
+		//Update throttle and current_speed
 		
+		var throttle = pole.throttle;
+				
+		if(pole.throttle < pole.desired_throttle)
+		{
+			throttle += POLE_THROTTLE_CHANGE_PER_TICK;
+			
+			if(throttle > pole.desired_throttle) throttle = pole.desired_throttle;
+			
+		}else if(pole.throttle > pole.desired_throttle)
+		{
+			throttle -= POLE_THROTTLE_CHANGE_PER_TICK;
+			
+			if(throttle < pole.desired_throttle) throttle = pole.desired_throttle;
+		}
+			
+		pole.throttle = throttle;
+		
+		pole.current_speed = pole.throttle/ThrottleRange.max*POLE_MAX_NONOVERBURN_SPEED;
+					
+	    var path = pole.path,
+	        x = path[0][0] + pole.vx * pole.current_speed,
+	        y = path[0][1] + pole.vy * pole.current_speed;
+	
+
 		poleDetectCollision(x,y,pole);
 	
 	

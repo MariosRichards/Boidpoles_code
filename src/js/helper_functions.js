@@ -1,11 +1,13 @@
 function getVelocityValueX()
 {
-	return Math.random() * 2 - 1;
+	//return Math.random() * 2 - 1;
+	return 1;
 }
 
 function getVelocityValueY()
 {
-	return Math.random() * 2 - 1;
+	//return Math.random() * 2 - 1;
+	return 1;
 }
 
 function getSpeed(dx,dy)
@@ -16,6 +18,10 @@ function getSpeed(dx,dy)
 function unitVectors(vx,vy) {
   var mag = Math.sqrt(vx*vx + vy*vy);
   return [vx/mag, vy/mag, mag];
+}
+
+function vectorWithMagnitude(vx,vy) {
+	
 }
 
 function radiansToBaseRangeAngle(angle) //Turns radian angle into the angle in range 0-255

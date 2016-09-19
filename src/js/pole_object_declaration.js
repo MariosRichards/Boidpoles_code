@@ -6,13 +6,27 @@ function Pole()
 	var x = Math.random() * (CANVAS_WIDTH - POLE_COLLISION_RADIUS*2),
 		y = Math.random() * (CANVAS_HEIGHT - POLE_COLLISION_RADIUS*2);
 		
+	if(x <= POLE_COLLISION_RADIUS*2)
+	{
+		x = 1 + POLE_COLLISION_RADIUS*2;
+	}
+	if(y <= POLE_COLLISION_RADIUS*2)
+	{
+		y = 1 + POLE_COLLISION_RADIUS*2;
+	}
+		
 	var free_space = false;
 	
 	var attempts = 10000;
 	
 	//Loop controls that poles only appear in free space, and not on top of other poles
+	//Not a perfect function, still has a chance of not finding a good spot for the pole and creating it anyway
+	//Next improvement: Make it so if there is no space for the pole, it won't be created, and it will tell so
 	while(!free_space && attempts > 0)
 	{
+		
+		//if(attempts == 1) alert();
+		
 		var collided = false;
 	
 		for(var i=0;i<spermatozoa.length;i++)
@@ -36,6 +50,15 @@ function Pole()
 		{
 			x = Math.random() * (CANVAS_WIDTH - POLE_COLLISION_RADIUS*2),
 			y = Math.random() * (CANVAS_HEIGHT - POLE_COLLISION_RADIUS*2);
+			
+			if(x < POLE_COLLISION_RADIUS*2)
+			{
+				x = 1 + POLE_COLLISION_RADIUS*2;
+			}
+			if(y < POLE_COLLISION_RADIUS*2)
+			{
+				y = 1 + POLE_COLLISION_RADIUS*2;
+			}
 		
 		} else {
 			free_space = true;
@@ -48,17 +71,14 @@ function Pole()
 	var shooting_cooldown = Math.floor(Math.random() * ((POLE_SHOOTING_COOLDOWN_BASE+SHOOTING_COOLDOWN_MAX_VARIANCE) - (POLE_SHOOTING_COOLDOWN_BASE-SHOOTING_COOLDOWN_MAX_VARIANCE)) + (POLE_SHOOTING_COOLDOWN_BASE-SHOOTING_COOLDOWN_MAX_VARIANCE));
 		
 	this.pole_cpu = new pole_cpu(this);
-	this.vx = getVelocityValueX();
-	this.vy = getVelocityValueY(); 
+
 	this.path = d3.range(TAIL_LENGTH).map(function() { return [x, y]; });
 	this.count = 0;
 	this.key = UNIQUE_KEY;
 	this.collision_cooldown = POLE_COLLISION_COOLDOWN;
 	this.initial_shooting_cooldown = shooting_cooldown;
 	this.actual_shooting_cooldown = shooting_cooldown;
-	
-	this.current_speed = 50;
-	
+		
 	this.intended_steering = 0; //In BaseRangeAngle Units
 	this.amount_steering_completed = 0; //In BaseRangeAngle Units
 	this.max_steering_per_tick = 8;
@@ -67,10 +87,13 @@ function Pole()
 	this.is_colliding_wall = false;
 	this.is_colliding_pole = false;
 	
-	this.throttle = 100;
-	
-	this.maximum_forward_speed = 150;
-	this.maximum_backwards_speed = 75;
+	this.throttle = Math.random() * (ThrottleRange.max - ThrottleRange.min) + ThrottleRange.min; //range [-75, 100]
+	this.desired_throttle = Math.random() * (ThrottleRange.max - ThrottleRange.min) + ThrottleRange.min;
+			
+	this.current_speed = this.throttle/ThrottleRange.max*POLE_MAX_NONOVERBURN_SPEED;
+		
+	this.vx = this.current_speed;
+	this.vy = this.current_speed; 
 	
 	this.current_heat_level = 0;
 	
@@ -313,7 +336,7 @@ function Pole()
 		
 	///Sets
 	
-	//sets throttle to [-75,100]
+	//sets desired_throttle to [-75,100]
 	this.set_throttle = function(x) {
 		
 		if(x < ThrottleRange.min)
@@ -325,7 +348,7 @@ function Pole()
 			x = ThrottleRange.max;
 		}
 		
-		this.throttle = x;
+		this.desired_throttle = x;
 		
 		/*var speed = x;
 		var converted_speed;

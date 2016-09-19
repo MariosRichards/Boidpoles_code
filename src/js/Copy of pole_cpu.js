@@ -678,7 +678,7 @@ function pole_cpu_update() {
 					case 8: // 11   0    O  Throttle          Sets throttle                  [-75 - 100]
 					break;
 					case 9: // 12   0    O  Rotate Turret     Offsets turret (cumulative)
-						this.pole.rotate_turret(10);
+						this.pole.rotate_turret(0);
 					break;
 					case 10: // 13   0    O  Aim Turret        Sets turret offset to value      [0 - 255]     
 						this.pole.aim_turret(0);

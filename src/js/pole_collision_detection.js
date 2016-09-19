@@ -46,8 +46,8 @@ function poleDetectCollision(x,y,pole){
 		
 	var is_colliding_wall = false;
 	
-	if (x < 0 || x > CANVAS_WIDTH) { is_colliding_wall = true; }
-    if (y < 0 || y > CANVAS_HEIGHT) { is_colliding_wall = true; }
+	if (x < 0 + POLE_COLLISION_RADIUS || x > CANVAS_WIDTH - POLE_COLLISION_RADIUS) { is_colliding_wall = true; }
+    if (y < 0 + POLE_COLLISION_RADIUS || y > CANVAS_HEIGHT - POLE_COLLISION_RADIUS) { is_colliding_wall = true; }
     
     pole.is_colliding_wall = is_colliding_wall;
     
