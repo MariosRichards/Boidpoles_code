@@ -1,7 +1,21 @@
 
 
+//Pole specific range vars
+
+var BaseAngleRange = { min: 0, max: 255};
+var RadiansRange = { min: 0, max: 2*Math.PI}; //Important to remember it's not from -Pi to Pi ; Pass every Math.atan through normalisation function
+
+var CPUBaseAngleRange = { min: -127, max: 128};
+
+var ThrottleRange = { min: -75, max: 100};
+
+var HeatRange = { min: 0, max: 500};
+
+var ScanRange = { min: 0, max: 1500};
 
 //Constants
+
+var MAXINT = 32767;
 
 var CANVAS_WIDTH = 960, //Default 960
     CANVAS_HEIGHT = 500; //Default 500
@@ -24,6 +38,9 @@ var SHOOTING_COOLDOWN_MAX_VARIANCE = 10; //100
 
 var BULLET_VELOCITY = 1;
 
+var SCANNER_GRAPHIC_COOLDOWN = 8;
+var SCANNER_CONE_RANGE = ScanRange.max;
+
 //Vars
 
 var INITIAL_NUMBER_POLES = 100, //Default 120
@@ -40,13 +57,3 @@ var BULLET_UNIQUE_KEY = -1;
 var VISIONCONES_ACTIVE = true;
 
 
-//Pole specific range vars
-
-var BaseAngleRange = { min: 0, max: 255};
-var RadiansRange = { min: 0, max: 2*Math.PI}; //Important to remember it's not from -Pi to Pi ; Pass every Math.atan through normalisation function
-
-var CPUBaseAngleRange = { min: -127, max: 128};
-
-var ThrottleRange = { min: -75, max: 100};
-
-var HeatRange = { min: 0, max: 500};

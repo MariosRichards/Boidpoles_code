@@ -103,6 +103,18 @@ function Pole()
 	//this.turret_heading = radiansToBaseRangeAngle((Math.atan2(this.vy, this.vx) * DEGREES)+(this.turret_heading_offset * DEGREES));
 	this.turret_heading = radiansToBaseRangeAngle(0);
 	
+	this.actual_scanner_graphic_cooldown = 0;
+	
+	this.closest_pole = null;
+	this.closest_pole_distance = null;
+	this.closest_pole_angle = null;
+	this.closest_pole_accuracy = null;
+	
+	this.latest_pole_target = null;
+	this.latest_pole_target_distance = null;
+	this.latest_pole_target_angle = null;
+	this.latest_pole_target_accuracy = null;
+	
 	this.armour = 100;
 		
 	
@@ -195,9 +207,21 @@ function Pole()
 	//returns range to nearest target in last scan
 	//( if you see nothing, return MAXINT (32767) )
 	this.scanner = function() {
-			
+				
+		this.actual_scanner_graphic_cooldown = SCANNER_GRAPHIC_COOLDOWN;
 		
+		scannerConeUpdate(this);
 		
+		if(this.closest_pole !=null)
+		{			
+			this.latest_pole_target = this.closest_pole;
+			this.latest_pole_target_distance = this.closest_pole_distance;
+			this.latest_pole_target_angle = this.closest_pole_angle;
+			this.latest_pole_target_accuracy = this.closest_pole_accuracy;
+						
+			return this.closest_pole_distance;
+		}
+		else return MAXINT;
 		//range [0-MaxScanRange?] [0 - 1500]
 	};
 	
@@ -206,6 +230,7 @@ function Pole()
 	
 	this.accuracy = function() {
 		
+		return this.latest_pole_target_accuracy;
 		//range [-2, 2]
 		
 	};

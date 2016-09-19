@@ -77,15 +77,15 @@ function updatePoles()
 	
 	var arc = d3.svg.arc()
 	    .innerRadius(0)
-	    .outerRadius(70)
+	    .outerRadius(SCANNER_CONE_RANGE)
 	    .startAngle(-45 * RADIANS) //converting from degs to radians
 	    .endAngle(45 * RADIANS) ;
 	    
 	groupNew
     .append("path")
     .attr("d", arc)
-    .attr("fill", "red")
-    .attr("fill-opacity", "0.4")
+    .attr("fill", "none")
+    .attr("fill-opacity", "0.3")
     .attr("class", "pole_vision_cone")
     .attr("class", "pole_turret")
     .attr("id",function(d) { return "pole_vision_cone"+d.key; });
