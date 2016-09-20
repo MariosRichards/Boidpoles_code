@@ -182,9 +182,10 @@ function pole_cpu(pole) {
 	this.program = new Int16Array([
 		18     , 128, 2  , // mov 8 to mem128
 		MAXCOMMANDS-1    , 1  , 0  , // label 1
-		32     , 14 , 65 , // scanner number to mem65
+		32     , 17 , 65 , // random number to mem65
 		13     , 65 , 255, // and mem65 with 255 [0-255]
 		//33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
+		32     , 14 , 65 , // scanner number to mem65
 		33+MAXCOMMANDS*2 , 10 , 129, // aim turret straight ahead
 		33+MAXCOMMANDS*2 , 12 , 65, // shoot turret to mem65
 		22     , 1  , 0 // jump to label 1
@@ -714,8 +715,7 @@ function pole_cpu_update() {
 					break;
 					case 12: // 15   3    O  Weapon control    Fires weapon w/ angle adjustment  [-4 - 4]
 						var adj = op2%5;
-						this.pole.fire_weapon(adj);		
-						
+						this.pole.fire_weapon(adj);	
 					break;
 					default:
 						throw "opo statement fail!";
