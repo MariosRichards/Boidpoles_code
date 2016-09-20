@@ -182,10 +182,11 @@ function pole_cpu(pole) {
 	this.program = new Int16Array([
 		18     , 128, 2  , // mov 8 to mem128
 		MAXCOMMANDS-1    , 1  , 0  , // label 1
-		32     , 14 , 65 , // random number to mem65
+		32     , 14 , 65 , // scanner number to mem65
 		13     , 65 , 255, // and mem65 with 255 [0-255]
-		33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
+		//33+MAXCOMMANDS*2 , 11 , 128 , // aim turret to mem65
 		33+MAXCOMMANDS*2 , 10 , 129, // aim turret straight ahead
+		33+MAXCOMMANDS*2 , 12 , 65, // shoot turret to mem65
 		22     , 1  , 0 // jump to label 1
 								   ]);								   
 								   
@@ -672,6 +673,7 @@ function pole_cpu_update() {
 			case 33: // OPO N1 V2
 				// force op1 into range 
 				var port = Math.abs(op1 % MAXOPO); // still some output only options in here!
+				
 				//var v = op2;
 				switch(port) {
 					case 0: // 17   0   I/O Scan-Arc          Sets/Returns scan-arc width.      [0 - 64]

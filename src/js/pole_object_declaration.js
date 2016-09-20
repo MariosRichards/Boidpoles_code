@@ -497,7 +497,7 @@ function Pole()
 	};
 	
 	//fire weapons at angle of turret with small adjustment [-4,4] adjustment
-	this.fire_weapon = function(x) {
+	this.fire_weapon = function(x_arg) {
 		
 		//Still have to program the angle adjustment
 		
@@ -509,10 +509,12 @@ function Pole()
 			
 		if(this.actual_shooting_cooldown < 0)
 		{
-			createNewBullet(x,y,this);
+			createNewBullet(x,y,x_arg,this);
 			
 			this.actual_shooting_cooldown = this.initial_shooting_cooldown;
 		}
+		
+		
 	};
 	
 	

@@ -1,4 +1,4 @@
-function Bullet(x,y,pole)
+function Bullet(x,y,correction_angle,pole)
 {
 	var vx = BULLET_VELOCITY;
 	var vy = BULLET_VELOCITY;
@@ -8,7 +8,7 @@ function Bullet(x,y,pole)
 		vx = pole.vx*2;
 		vy = pole.vy*2;
 		
-		var velo = rotateVectorByAngle([vx,vy],properAngleNormalisation(baseRangeAngleToRadians(pole.turret_heading_offset)));
+		var velo = rotateVectorByAngle([vx,vy],properAngleNormalisation(baseRangeAngleToRadians(pole.turret_heading_offset + correction_angle)));
 	
 		vx = velo[0];
 		vy = velo[1];
@@ -45,10 +45,10 @@ function deleteBulletByKey(key)
 	updateBullets();
 }
 
-function createNewBullet(x,y,pole)
+function createNewBullet(x,y,correction_angle,pole)
 {	
 	
-	var new_bullet = new Bullet(x,y,pole);
+	var new_bullet = new Bullet(x,y,correction_angle,pole);
 	
 	bullets.push(new_bullet);
 					

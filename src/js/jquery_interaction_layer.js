@@ -28,7 +28,7 @@ $(document).ready(function(){
 	
 	$("#create_bullet").click(function(e){
 		
-		createNewBullet(0,0);
+		createNewBullet(0,0,0,null);
 		
 	});
 	$("#create_bullets").click(function(e){
